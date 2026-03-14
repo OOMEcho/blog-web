@@ -34,10 +34,8 @@ export default {
   },
   computed: {
     blogTitle () {
-      const config = this.$store.getters.blogConfig
-      if (!config) return 'Blog'
-      const item = Array.isArray(config) ? config.find(c => c.configKey === 'blog_title') : null
-      return item ? item.configValue : 'Blog'
+      const configMap = this.$store.getters.configMap || {}
+      return configMap.site_name || 'Blog'
     }
   },
   methods: {

@@ -71,8 +71,8 @@ export default {
       this.loading = true
       try {
         const res = await getArticles({
-          page: this.currentPage,
-          size: this.pageSize,
+          pageNum: this.currentPage,
+          pageSize: this.pageSize,
           tagId: this.tagId
         })
         if (res && res.data) {

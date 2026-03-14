@@ -11,6 +11,23 @@
               v-html="aboutContent"
             />
 
+            <div v-if="socialLinks.length" class="social-section">
+              <h2>社交方式</h2>
+              <div class="social-links">
+                <a
+                  v-for="item in socialLinks"
+                  :key="item.key"
+                  :href="item.href"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="social-link"
+                >
+                  <i :class="item.icon" />
+                  <span>{{ item.label }}</span>
+                </a>
+              </div>
+            </div>
+
             <!-- 友情链接 -->
             <div v-if="links.length" class="links-section">
               <h2>友情链接</h2>
@@ -54,12 +71,52 @@ export default {
   },
   computed: {
     configMap () {
-      const config = this.$store.getters.blogConfig
-      if (!config || !Array.isArray(config)) return {}
-      return config.reduce((acc, c) => { acc[c.configKey] = c.configValue; return acc }, {})
+      return this.$store.getters.configMap || {}
     },
     aboutContent () {
-      return this.configMap.blog_about || '<p>欢迎来到我的博客！</p>'
+      return this.configMap.site_about || '<p>欢迎来到我的博客！</p>'
+    },
+    socialLinks () {
+      const links = []
+      const github = (this.configMap.social_github || '').trim()
+      const gitee = (this.configMap.social_gitee || '').trim()
+      const email = (this.configMap.social_email || '').trim()
+      const qq = (this.configMap.social_qq || '').trim()
+
+      if (github) {
+        links.push({
+          key: 'github',
+          label: 'GitHub',
+          href: /^https?:\/\//i.test(github) ? github : `https://${github}`,
+          icon: 'el-icon-link'
+        })
+      }
+      if (gitee) {
+        links.push({
+          key: 'gitee',
+          label: 'Gitee',
+          href: /^https?:\/\//i.test(gitee) ? gitee : `https://${gitee}`,
+          icon: 'el-icon-link'
+        })
+      }
+      if (email) {
+        links.push({
+          key: 'email',
+          label: '邮箱',
+          href: `mailto:${email}`,
+          icon: 'el-icon-message'
+        })
+      }
+      if (qq) {
+        links.push({
+          key: 'qq',
+          label: `QQ: ${qq}`,
+          href: `https://wpa.qq.com/msgrd?v=3&uin=${qq}&site=qq&menu=yes`,
+          icon: 'el-icon-chat-dot-round'
+        })
+      }
+
+      return links
     }
   },
   created () {
@@ -107,6 +164,38 @@ export default {
   font-size: 15px;
   color: #606266;
   line-height: 1.8;
+}
+.social-section {
+  margin-top: 28px;
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 20px;
+  color: #606266;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color .2s, border-color .2s;
+  &:hover {
+    color: #409EFF;
+    border-color: #b3d8ff;
+  }
 }
 .links-section {
   margin-top: 40px;

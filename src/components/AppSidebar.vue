@@ -5,12 +5,19 @@
       <div class="author-info">
         <img
           class="avatar"
-          :src="configMap.blog_avatar || defaultAvatar"
+          :src="configMap.site_avatar || defaultAvatar"
           alt="avatar"
         />
-        <p class="author-name">{{ configMap.blog_author || '博主' }}</p>
-        <p class="author-bio">{{ configMap.blog_description || '' }}</p>
+        <p class="author-name">{{ configMap.site_author || '博主' }}</p>
+        <p class="author-bio">{{ configMap.site_description || '' }}</p>
       </div>
+    </el-card>
+
+    <el-card v-if="configMap.site_notice" class="sidebar-card" shadow="never">
+      <div slot="header" class="card-header">
+        <i class="el-icon-bell" /> 公告
+      </div>
+      <p class="site-notice">{{ configMap.site_notice }}</p>
     </el-card>
 
     <!-- 分类 -->
@@ -59,9 +66,7 @@ export default {
   },
   computed: {
     configMap () {
-      const config = this.$store.getters.blogConfig
-      if (!config || !Array.isArray(config)) return {}
-      return config.reduce((acc, c) => { acc[c.configKey] = c.configValue; return acc }, {})
+      return this.$store.getters.configMap || {}
     },
     categories () {
       return this.$store.getters.categories || []
@@ -108,6 +113,14 @@ export default {
       line-height: 1.5;
       margin: 0;
     }
+  }
+
+  .site-notice {
+    margin: 0;
+    font-size: 13px;
+    color: #606266;
+    line-height: 1.65;
+    white-space: pre-wrap;
   }
 
   .sidebar-list {

@@ -8,10 +8,11 @@
         <span class="meta-item">
           <i class="el-icon-folder-opened" />
           <router-link
-            v-if="article.category"
-            :to="`/category/${article.category.id}`"
+            v-if="articleCategoryId"
+            :to="`/category/${articleCategoryId}`"
             @click.native.stop
-          >{{ article.category.name }}</router-link>
+          >{{ articleCategoryName }}</router-link>
+          <span v-else-if="articleCategoryName">{{ articleCategoryName }}</span>
         </span>
         <span class="meta-item">
           <i class="el-icon-time" />
@@ -24,15 +25,15 @@
       </div>
       <h2 class="card-title">{{ article.title }}</h2>
       <p class="card-excerpt">{{ excerpt(article.summary || article.content) }}</p>
-      <div class="card-tags" v-if="article.tags && article.tags.length">
+      <div class="card-tags" v-if="articleTagList.length">
         <el-tag
-          v-for="tag in article.tags"
+          v-for="tag in articleTagList"
           :key="tag.id"
           size="mini"
           type="info"
-          @click.native.stop="$router.push(`/tag/${tag.id}`)"
+          @click.native.stop="goTag(tag.id)"
           style="cursor:pointer;margin-right:6px;"
-        >{{ tag.name }}</el-tag>
+        >{{ tag.name || tag.tagName || '' }}</el-tag>
       </div>
     </div>
   </el-card>
@@ -49,9 +50,32 @@ export default {
       required: true
     }
   },
+  computed: {
+    articleCategoryId () {
+      return this.article.categoryId || (this.article.category && this.article.category.id) || null
+    },
+    articleCategoryName () {
+      return this.article.categoryName || (this.article.category && this.article.category.name) || ''
+    },
+    articleTagList () {
+      if (Array.isArray(this.article.tagList)) {
+        return this.article.tagList
+      }
+      if (Array.isArray(this.article.tags)) {
+        return this.article.tags
+      }
+      return []
+    }
+  },
   methods: {
     formatDate,
     excerpt,
+    goTag (tagId) {
+      if (!tagId) {
+        return
+      }
+      this.$router.push(`/tag/${tagId}`)
+    },
     goDetail () {
       this.$router.push(`/article/${this.article.id}`)
     }

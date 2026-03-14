@@ -15,14 +15,15 @@
             <!-- 元信息 -->
             <div class="article-meta">
               <span class="meta-item">
-                <i class="el-icon-user" /> {{ article.author || '博主' }}
+                <i class="el-icon-user" /> {{ article.authorName || article.author || '博主' }}
               </span>
               <span class="meta-item">
                 <i class="el-icon-time" /> {{ formatDate(article.createTime) }}
               </span>
-              <span class="meta-item" v-if="article.category">
+              <span class="meta-item" v-if="article.categoryName">
                 <i class="el-icon-folder-opened" />
-                <router-link :to="`/category/${article.category.id}`">{{ article.category.name }}</router-link>
+                <router-link v-if="article.categoryId" :to="`/category/${article.categoryId}`">{{ article.categoryName }}</router-link>
+                <span v-else>{{ article.categoryName }}</span>
               </span>
               <span class="meta-item">
                 <i class="el-icon-view" /> {{ article.viewCount || 0 }} 次阅读
@@ -30,9 +31,9 @@
             </div>
 
             <!-- 标签 -->
-            <div class="article-tags" v-if="article.tags && article.tags.length">
+            <div class="article-tags" v-if="articleTagList.length">
               <el-tag
-                v-for="tag in article.tags"
+                v-for="tag in articleTagList"
                 :key="tag.id"
                 size="small"
                 type="info"
@@ -71,7 +72,7 @@
               class="comment-item"
             >
               <div class="comment-author">
-                <img :src="defaultAvatar" class="comment-avatar" alt="avatar" />
+                <img :src="comment.avatar || defaultAvatar" class="comment-avatar" alt="avatar" />
                 <div class="comment-content">
                   <div class="comment-info">
                     <span class="author-name">{{ comment.nickname }}</span>
@@ -86,7 +87,7 @@
                       :key="child.id"
                       class="comment-item child"
                     >
-                      <img :src="defaultAvatar" class="comment-avatar small" alt="avatar" />
+                      <img :src="child.avatar || defaultAvatar" class="comment-avatar small" alt="avatar" />
                       <div class="comment-content">
                         <div class="comment-info">
                           <span class="author-name">{{ child.nickname }}</span>
@@ -105,13 +106,11 @@
           <!-- 发表评论 -->
           <div class="comment-form">
             <h3 class="form-title">发表评论</h3>
-            <el-form :model="commentForm" ref="commentForm" :rules="commentRules" label-width="80px">
-              <el-form-item label="昵称" prop="nickname">
-                <el-input v-model="commentForm.nickname" placeholder="请输入昵称" maxlength="20" />
-              </el-form-item>
-              <el-form-item label="邮箱" prop="email">
-                <el-input v-model="commentForm.email" placeholder="请输入邮箱（可选）" />
-              </el-form-item>
+            <div v-if="!isLoggedIn" class="comment-login-tip">
+              <p>评论需要登录后才能发布。</p>
+              <el-button type="primary" size="small" @click="openLoginDialog">登录评论</el-button>
+            </div>
+            <el-form v-else :model="commentForm" ref="commentForm" :rules="commentRules" label-width="80px">
               <el-form-item label="评论" prop="content">
                 <el-input
                   v-model="commentForm.content"
@@ -133,17 +132,25 @@
       </main>
       <app-sidebar class="sidebar" />
     </div>
+
+    <comment-login-dialog :visible.sync="loginDialogVisible" @login-success="handleLoginSuccess" />
   </div>
 </template>
 
 <script>
 import AppSidebar from '../components/AppSidebar.vue'
+import CommentLoginDialog from '@/components/CommentLoginDialog.vue'
 import { getArticleDetail, getComments, addComment } from '@/api/blog'
+import { getProfileInfo } from '@/api/auth'
+import { clearAccessToken, getAccessToken } from '@/utils/auth'
 import { formatDate } from '@/utils/format'
 
 export default {
   name: 'ArticleDetail',
-  components: { AppSidebar },
+  components: {
+    AppSidebar,
+    CommentLoginDialog
+  },
   data () {
     return {
       article: null,
@@ -152,29 +159,69 @@ export default {
       commentLoading: false,
       submitting: false,
       defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea0722f.png',
+      isLoggedIn: false,
+      userInfo: null,
+      loginDialogVisible: false,
       commentForm: {
-        nickname: '',
-        email: '',
         content: '',
         articleId: null,
-        parentId: null
+        parentId: null,
+        replyToId: null
       },
       commentRules: {
-        nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
         content: [
           { required: true, message: '请输入评论内容', trigger: 'blur' },
           { min: 2, message: '评论不少于2个字符', trigger: 'blur' }
-        ],
-        email: [{ type: 'email', message: '邮箱格式不正确', trigger: 'blur' }]
+        ]
       }
     }
   },
+  computed: {
+    articleTagList () {
+      if (!this.article) {
+        return []
+      }
+      if (Array.isArray(this.article.tagList)) {
+        return this.article.tagList
+      }
+      if (Array.isArray(this.article.tags)) {
+        return this.article.tags
+      }
+      return []
+    }
+  },
   created () {
+    this.initAuthStatus()
     this.fetchDetail()
     this.fetchComments()
   },
   methods: {
     formatDate,
+    async initAuthStatus () {
+      const token = getAccessToken()
+      if (!token) {
+        this.isLoggedIn = false
+        this.userInfo = null
+        return
+      }
+      try {
+        const res = await getProfileInfo()
+        this.userInfo = (res && res.data) ? res.data : res
+        this.isLoggedIn = true
+      } catch (e) {
+        clearAccessToken()
+        this.isLoggedIn = false
+        this.userInfo = null
+      }
+    },
+    openLoginDialog () {
+      this.loginDialogVisible = true
+    },
+    handleLoginSuccess ({ userInfo }) {
+      this.userInfo = userInfo || null
+      this.isLoggedIn = true
+      this.loginDialogVisible = false
+    },
     async fetchDetail () {
       this.loading = true
       try {
@@ -198,19 +245,33 @@ export default {
       }
     },
     submitComment () {
+      if (!this.isLoggedIn) {
+        this.openLoginDialog()
+        return
+      }
       this.$refs.commentForm.validate(async valid => {
         if (!valid) return
         this.submitting = true
         try {
-          this.commentForm.articleId = Number(this.$route.params.id)
-          await addComment(this.commentForm)
+          const payload = {
+            articleId: Number(this.$route.params.id),
+            content: this.commentForm.content,
+            parentId: this.commentForm.parentId,
+            replyToId: this.commentForm.replyToId
+          }
+          await addComment(payload)
           this.$message.success('评论提交成功，审核通过后将显示')
           this.commentForm.content = ''
-          this.commentForm.nickname = ''
-          this.commentForm.email = ''
           this.$refs.commentForm.resetFields()
+          this.fetchComments()
         } catch (e) {
-          // error already handled in request.js
+          const msg = e && e.message ? e.message : ''
+          if (msg.includes('请先登录') || msg.includes('未登录')) {
+            clearAccessToken()
+            this.isLoggedIn = false
+            this.userInfo = null
+            this.openLoginDialog()
+          }
         } finally {
           this.submitting = false
         }
@@ -332,6 +393,23 @@ export default {
     font-weight: 600;
     color: #303133;
     margin-bottom: 20px;
+  }
+
+  .comment-login-tip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f8fafc;
+
+    p {
+      margin: 0;
+      color: #475569;
+      font-size: 14px;
+    }
   }
 }
 @media (max-width: 800px) {

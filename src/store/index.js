@@ -5,18 +5,25 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    blogConfig: null,
+    blogConfig: [],
+    configMap: {},
     categories: [],
     tags: []
   },
   getters: {
     blogConfig: state => state.blogConfig,
+    configMap: state => state.configMap,
     categories: state => state.categories,
     tags: state => state.tags
   },
   mutations: {
     SET_BLOG_CONFIG (state, config) {
-      state.blogConfig = config
+      const list = Array.isArray(config) ? config : []
+      state.blogConfig = list
+      state.configMap = list.reduce((acc, item) => {
+        acc[item.configKey] = item.configValue
+        return acc
+      }, {})
     },
     SET_CATEGORIES (state, list) {
       state.categories = list
@@ -33,9 +40,17 @@ export default new Vuex.Store({
         getCategories(),
         getTags()
       ])
-      if (cfgRes.code === 200) commit('SET_BLOG_CONFIG', cfgRes.data)
-      if (catRes.code === 200) commit('SET_CATEGORIES', catRes.data)
-      if (tagRes.code === 200) commit('SET_TAGS', tagRes.data)
+      if (cfgRes && cfgRes.code === 200) {
+        commit('SET_BLOG_CONFIG', cfgRes.data)
+      } else {
+        commit('SET_BLOG_CONFIG', [])
+      }
+      if (catRes && catRes.code === 200) {
+        commit('SET_CATEGORIES', catRes.data)
+      }
+      if (tagRes && tagRes.code === 200) {
+        commit('SET_TAGS', tagRes.data)
+      }
     }
   },
   modules: {}

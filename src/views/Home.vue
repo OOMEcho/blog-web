@@ -68,15 +68,14 @@ export default {
   },
   created () {
     this.fetchArticles()
-    this.$store.dispatch('fetchBlogConfig').catch(() => {})
   },
   methods: {
     async fetchArticles () {
       this.loading = true
       try {
         const params = {
-          page: this.currentPage,
-          size: this.pageSize
+          pageNum: this.currentPage,
+          pageSize: this.pageSize
         }
         let res
         if (this.keyword) {

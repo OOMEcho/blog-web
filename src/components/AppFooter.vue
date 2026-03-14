@@ -12,15 +12,17 @@ export default {
   name: 'AppFooter',
   computed: {
     configMap () {
-      const config = this.$store.getters.blogConfig
-      if (!config || !Array.isArray(config)) return {}
-      return config.reduce((acc, c) => { acc[c.configKey] = c.configValue; return acc }, {})
+      return this.$store.getters.configMap || {}
     },
     copyright () {
-      return this.configMap.blog_footer || `© ${new Date().getFullYear()} Blog. All rights reserved.`
+      if (this.configMap.site_footer) {
+        return this.configMap.site_footer
+      }
+      const siteName = this.configMap.site_name || 'Blog'
+      return `© ${new Date().getFullYear()} ${siteName}. All rights reserved.`
     },
     icp () {
-      return this.configMap.blog_icp || ''
+      return this.configMap.site_record_number || ''
     }
   }
 }
