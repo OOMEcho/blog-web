@@ -59,6 +59,7 @@
 <script>
 import AppSidebar from '../components/AppSidebar.vue'
 import { getLinks } from '@/api/blog'
+import DOMPurify from 'dompurify'
 
 export default {
   name: 'AboutView',
@@ -74,7 +75,8 @@ export default {
       return this.$store.getters.configMap || {}
     },
     aboutContent () {
-      return this.configMap.site_about || '<p>欢迎来到我的博客！</p>'
+      const raw = this.configMap.site_about || '<p>欢迎来到我的博客！</p>'
+      return DOMPurify.sanitize(raw)
     },
     socialLinks () {
       const links = []
