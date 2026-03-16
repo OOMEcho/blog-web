@@ -2,29 +2,60 @@
   <div class="page-tag">
     <div class="page-inner">
       <main class="main-content">
-        <div class="page-title" v-if="tagName">
-          <i class="el-icon-price-tag" /> 标签：{{ tagName }}
-          <span class="count">（{{ total }} 篇）</span>
-        </div>
-        <div v-loading="loading">
-          <article-card
-            v-for="article in articles"
-            :key="article.id"
-            :article="article"
-          />
-        </div>
-        <el-empty v-if="!loading && articles.length === 0" description="该标签下暂无文章" />
-        <el-pagination
-          v-if="total > pageSize"
-          background
-          layout="prev, pager, next"
-          :total="total"
-          :page-size="pageSize"
-          :current-page.sync="currentPage"
-          @current-change="fetchArticles"
-          class="pagination"
-        />
+        <section class="head-segment">
+          <div>
+            <h1>标签</h1>
+            <p>按标签筛选文章</p>
+          </div>
+          <div class="head-count">共 {{ tags.length }} 个标签</div>
+        </section>
+
+        <section class="filter-segment">
+          <button
+            type="button"
+            class="tag-btn"
+            :class="{ active: isAll }"
+            @click="switchTag('-1')"
+          >全部<span>{{ allCount }}</span></button>
+
+          <button
+            v-for="tag in tags"
+            :key="tag.id"
+            type="button"
+            class="tag-btn"
+            :class="{ active: String(tag.id) === String(tagId) }"
+            @click="switchTag(tag.id)"
+          >{{ tag.name }}<span>{{ toCount(tag.articleCount) }}</span></button>
+        </section>
+
+        <section class="list-segment">
+          <div class="list-title">
+            <h2>{{ currentTitle }}</h2>
+            <span>{{ total }} 篇</span>
+          </div>
+
+          <div v-loading="loading">
+            <article-card
+              v-for="article in articles"
+              :key="article.id"
+              :article="article"
+            />
+          </div>
+          <el-empty v-if="!loading && articles.length === 0" description="该标签下暂无文章" />
+
+          <div class="pager-wrap" v-if="total > pageSize">
+            <el-pagination
+              background
+              layout="prev, pager, next"
+              :total="total"
+              :page-size="pageSize"
+              :current-page.sync="currentPage"
+              @current-change="fetchArticles"
+            />
+          </div>
+        </section>
       </main>
+
       <app-sidebar class="sidebar" />
     </div>
   </div>
@@ -51,10 +82,21 @@ export default {
     tagId () {
       return this.$route.params.id
     },
-    tagName () {
-      const tags = this.$store.getters.tags || []
-      const tag = tags.find(t => String(t.id) === String(this.tagId))
-      return tag ? tag.name : ''
+    tags () {
+      return this.$store.getters.tags || []
+    },
+    isAll () {
+      return String(this.tagId) === '-1'
+    },
+    currentTitle () {
+      if (this.isAll) {
+        return '全部标签文章'
+      }
+      const tag = this.tags.find(item => String(item.id) === String(this.tagId))
+      return tag ? `${tag.name} 标签文章` : '标签文章'
+    },
+    allCount () {
+      return this.tags.reduce((sum, item) => sum + this.toCount(item.articleCount), 0)
     }
   },
   watch: {
@@ -67,14 +109,26 @@ export default {
     this.fetchArticles()
   },
   methods: {
+    toCount (value) {
+      const count = Number(value)
+      return Number.isFinite(count) && count > 0 ? count : 0
+    },
+    switchTag (id) {
+      this.$router.push(`/tag/${id}`)
+    },
     async fetchArticles () {
       this.loading = true
       try {
-        const res = await getArticles({
+        const params = {
           pageNum: this.currentPage,
-          pageSize: this.pageSize,
-          tagId: this.tagId
-        })
+          pageSize: this.pageSize
+        }
+
+        if (!this.isAll) {
+          params.tagId = this.tagId
+        }
+
+        const res = await getArticles(params)
         this.articles = Array.isArray(res && res.records) ? res.records : []
         this.total = Number((res && res.total) || 0)
       } catch (e) {
@@ -90,29 +144,125 @@ export default {
 
 <style lang="scss" scoped>
 .page-tag {
-  max-width: 1100px;
-  margin: 32px auto;
-  padding: 0 20px;
+  max-width: 1120px;
+  margin: 24px auto 0;
+  padding: 0 18px;
 }
+
 .page-inner {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
 }
-.page-title {
-  font-size: 18px;
+
+.head-segment,
+.filter-segment,
+.list-segment {
+  background: #fff;
+  border: 1px solid var(--blog-border);
+  border-radius: 6px;
+  box-shadow: var(--blog-shadow);
+}
+
+.head-segment {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h1 {
+    margin: 0;
+    color: var(--blog-brand-dark);
+    font-size: 24px;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #81858d;
+    font-size: 13px;
+  }
+}
+
+.head-count {
+  font-size: 14px;
+  color: #ff8a00;
   font-weight: 600;
-  color: #303133;
-  margin-bottom: 24px;
-  .count { font-size: 14px; color: #909399; font-weight: 400; }
 }
-.pagination {
-  margin-top: 32px;
+
+.filter-segment {
+  margin-top: 12px;
+  padding: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-btn {
+  border: 1px solid #dcdfe6;
+  background: #fff;
+  border-radius: 16px;
+  padding: 0 10px;
+  line-height: 30px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+
+  span {
+    margin-left: 6px;
+    color: #909399;
+  }
+
+  &.active {
+    border-color: rgba(0, 181, 173, 0.6);
+    color: var(--blog-brand-dark);
+    background: #effcfb;
+  }
+}
+
+.list-segment {
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.list-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #2f3237;
+  }
+
+  span {
+    font-size: 13px;
+    color: #8a8f97;
+  }
+}
+
+.pager-wrap {
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
-@media (max-width: 800px) {
-  .page-inner { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+
+@media (max-width: 980px) {
+  .page-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .head-segment {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 </style>

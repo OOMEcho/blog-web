@@ -1,48 +1,46 @@
 <template>
   <div class="page-archive">
-    <div class="page-inner">
-      <main class="main-content">
-        <h1 class="page-title">
-          <i class="el-icon-collection" /> 归档
-          <span class="count">（共 {{ articles.length }} 篇）</span>
-        </h1>
+    <div class="archive-shell">
+      <section class="archive-head">
+        <h1>归档</h1>
+        <p>共 <span>{{ articles.length }}</span> 篇文章</p>
+      </section>
 
-        <div v-loading="loading">
-          <div
-            v-for="(group, year) in groupedArticles"
-            :key="year"
-            class="year-group"
-          >
-            <h2 class="year-label">{{ year }}</h2>
-            <ul class="article-list">
-              <li
-                v-for="article in group"
-                :key="article.id"
-                @click="$router.push(`/article/${article.id}`)"
-                class="article-item"
-              >
-                <span class="date">{{ formatDate(article.createTime, 'MM-DD') }}</span>
+      <section class="archive-body" v-loading="loading">
+        <div
+          v-for="(group, year) in groupedArticles"
+          :key="year"
+          class="year-block"
+        >
+          <h2>{{ year }}</h2>
+          <ul>
+            <li
+              v-for="article in group"
+              :key="article.id"
+              @click="$router.push(`/article/${article.id}`)"
+            >
+              <div class="item-main">
+                <i class="dot" />
                 <span class="title">{{ article.title }}</span>
-              </li>
-            </ul>
-          </div>
+                <span class="date">{{ formatDate(article.createTime, 'MM-DD') }}</span>
+              </div>
+              <span class="origin">原创</span>
+            </li>
+          </ul>
         </div>
+      </section>
 
-        <el-empty v-if="!loading && articles.length === 0" description="暂无归档文章" />
-      </main>
-      <app-sidebar class="sidebar" />
+      <el-empty v-if="!loading && articles.length === 0" description="暂无归档文章" />
     </div>
   </div>
 </template>
 
 <script>
-import AppSidebar from '../components/AppSidebar.vue'
 import { getArchives } from '@/api/blog'
 import { formatDate } from '@/utils/format'
 
 export default {
   name: 'ArchiveView',
-  components: { AppSidebar },
   data () {
     return {
       articles: [],
@@ -54,13 +52,18 @@ export default {
       const groups = {}
       this.articles.forEach(article => {
         const year = new Date(article.createTime).getFullYear()
-        if (!groups[year]) groups[year] = []
+        if (!groups[year]) {
+          groups[year] = []
+        }
         groups[year].push(article)
       })
-      // 按年份降序
+
       return Object.keys(groups)
-        .sort((a, b) => b - a)
-        .reduce((acc, year) => { acc[year] = groups[year]; return acc }, {})
+        .sort((a, b) => Number(b) - Number(a))
+        .reduce((acc, year) => {
+          acc[year] = groups[year]
+          return acc
+        }, {})
     }
   },
   created () {
@@ -85,63 +88,144 @@ export default {
 
 <style lang="scss" scoped>
 .page-archive {
-  max-width: 1100px;
-  margin: 32px auto;
-  padding: 0 20px;
+  max-width: 980px;
+  margin: 24px auto 0;
+  padding: 0 18px;
 }
-.page-inner {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 32px;
+
+.archive-head,
+.archive-body {
+  background: #fff;
+  border: 1px solid var(--blog-border);
+  border-radius: 6px;
+  box-shadow: var(--blog-shadow);
 }
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #303133;
-  margin-bottom: 32px;
-  .count { font-size: 15px; color: #909399; font-weight: 400; }
-}
-.year-group {
-  margin-bottom: 32px;
-  .year-label {
-    font-size: 20px;
+
+.archive-head {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h1 {
+    margin: 0;
+    color: var(--blog-brand-dark);
+    font-size: 24px;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 15px;
+  }
+
+  span {
+    color: #ff8a00;
     font-weight: 700;
-    color: #409EFF;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #e8f4ff;
   }
 }
-.article-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  .article-item {
+
+.archive-body {
+  margin-top: 12px;
+  padding: 16px;
+}
+
+.year-block {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h2 {
+    margin: 0 0 10px;
+    color: #2f3237;
+    font-size: 24px;
+    text-align: center;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #eef0f2;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  li {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 10px 8px;
-    border-bottom: 1px dashed #f0f0f0;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f2f3f5;
     cursor: pointer;
-    border-radius: 4px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
     &:hover {
-      background: #f5f7fa;
-      .title { color: #409EFF; }
-    }
-    .date {
-      font-size: 13px;
-      color: #909399;
-      white-space: nowrap;
-      min-width: 50px;
-    }
-    .title {
-      font-size: 15px;
-      color: #303133;
+      background: #f9fbfc;
+
+      .title {
+        color: var(--blog-brand-dark);
+      }
     }
   }
 }
-@media (max-width: 800px) {
-  .page-inner { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+
+.item-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blog-brand);
+  flex-shrink: 0;
+}
+
+.title {
+  color: #333;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  color: #a0a4ab;
+  font-size: 12px;
+}
+
+.origin {
+  color: #ff8a00;
+  border: 1px solid #ffd4a3;
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .archive-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .year-block h2 {
+    text-align: left;
+    font-size: 20px;
+  }
+
+  .title {
+    max-width: 160px;
+  }
 }
 </style>

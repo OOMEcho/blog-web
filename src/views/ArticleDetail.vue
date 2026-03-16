@@ -1,77 +1,76 @@
 <template>
   <div class="page-detail">
-    <div class="page-inner">
-      <main class="main-content">
-        <el-card v-loading="loading" class="article-main" shadow="never">
-          <template v-if="article">
-            <div class="cover" v-if="article.coverImage">
-              <img :src="article.coverImage" :alt="article.title" />
-            </div>
+    <div class="detail-shell" v-loading="loading">
+      <template v-if="article">
+        <section class="detail-head">
+          <div class="head-item author">
+            <img :src="article.authorAvatar || defaultAvatar" alt="author">
+            <router-link to="/about">{{ article.authorName || '博主' }}</router-link>
+          </div>
+          <div class="head-item"><i class="el-icon-date" /> {{ formatDate(article.createTime) }}</div>
+          <div class="head-item"><i class="el-icon-view" /> {{ article.viewCount || 0 }}</div>
+        </section>
 
-            <h1 class="article-title">{{ article.title }}</h1>
+        <section class="detail-cover" v-if="article.coverImage">
+          <img :src="article.coverImage" :alt="article.title">
+        </section>
 
-            <div class="article-meta">
-              <span class="meta-item">
-                <i class="el-icon-user" /> {{ article.authorName || article.author || '博主' }}
-              </span>
-              <span class="meta-item">
-                <i class="el-icon-time" /> {{ formatDate(article.createTime) }}
-              </span>
-              <span class="meta-item" v-if="article.categoryName">
-                <i class="el-icon-folder-opened" />
-                <router-link v-if="article.categoryId" :to="`/category/${article.categoryId}`">{{ article.categoryName }}</router-link>
-                <span v-else>{{ article.categoryName }}</span>
-              </span>
-              <span class="meta-item">
-                <i class="el-icon-view" /> {{ article.viewCount || 0 }} 次阅读
-              </span>
-            </div>
+        <section class="detail-body">
+          <div class="origin-tag">原创</div>
+          <h1>{{ article.title }}</h1>
 
-            <div class="article-tags" v-if="articleTagList.length">
-              <el-tag
-                v-for="tag in articleTagList"
-                :key="tag.id"
-                size="small"
-                type="info"
-                @click.native="$router.push(`/tag/${tag.id}`)"
-                style="cursor:pointer;margin-right:8px"
-              >{{ tag.name }}</el-tag>
-            </div>
+          <div class="article-content">
+            <mavon-editor
+              :value="article.content || ''"
+              :subfield="false"
+              :default-open="'preview'"
+              :toolbars-flag="false"
+              :editable="false"
+              :scroll-style="true"
+              :box-shadow="false"
+            />
+          </div>
 
-            <div class="article-body">
-              <mavon-editor
-                :value="article.content || ''"
-                :subfield="false"
-                :default-open="'preview'"
-                :toolbars-flag="false"
-                :editable="false"
-                :scroll-style="true"
-                :box-shadow="false"
-              />
-            </div>
-          </template>
-          <el-empty v-else-if="!loading" description="文章不存在" />
-        </el-card>
-      </main>
-      <app-sidebar class="sidebar" />
+          <div class="tag-wrap" v-if="articleTagList.length">
+            <button
+              v-for="tag in articleTagList"
+              :key="tag.id"
+              type="button"
+              @click="$router.push(`/tag/${tag.id}`)"
+            >{{ tag.name }}</button>
+          </div>
+        </section>
+
+        <section class="detail-info">
+          <div>
+            <p>作者：{{ article.authorName || '博主' }}</p>
+            <p>发表时间：{{ formatDate(article.createTime, 'YYYY-MM-DD') }}</p>
+            <p v-if="article.categoryName">
+              分类：
+              <router-link v-if="article.categoryId" :to="`/category/${article.categoryId}`">{{ article.categoryName }}</router-link>
+              <span v-else>{{ article.categoryName }}</span>
+            </p>
+            <p>版权声明：转载请注明出处</p>
+          </div>
+        </section>
+      </template>
+
+      <el-empty v-else-if="!loading" description="文章不存在" />
     </div>
   </div>
 </template>
 
 <script>
-import AppSidebar from '../components/AppSidebar.vue'
 import { getArticleDetail } from '@/api/blog'
 import { formatDate } from '@/utils/format'
 
 export default {
   name: 'ArticleDetail',
-  components: {
-    AppSidebar
-  },
   data () {
     return {
       article: null,
-      loading: false
+      loading: false,
+      defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea0722f.png'
     }
   },
   computed: {
@@ -115,90 +114,139 @@ export default {
 
 <style lang="scss" scoped>
 .page-detail {
-  max-width: 1100px;
-  margin: 32px auto;
-  padding: 0 20px;
+  max-width: 980px;
+  margin: 24px auto 0;
+  padding: 0 18px;
 }
 
-.page-inner {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 32px;
+.detail-head,
+.detail-cover,
+.detail-body,
+.detail-info {
+  background: #fff;
+  border: 1px solid var(--blog-border);
+  border-radius: 6px;
+  box-shadow: var(--blog-shadow);
 }
 
-.article-main {
-  border-radius: 8px;
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 14px;
+}
 
-  .cover {
-    margin: -20px -20px 24px;
-    max-height: 400px;
-    overflow: hidden;
+.head-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6f747c;
+  font-size: 13px;
 
-    img {
-      width: 100%;
-      object-fit: cover;
+  &.author img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  a {
+    color: #4f5a62;
+    text-decoration: none;
+  }
+}
+
+.detail-cover {
+  margin-top: 10px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 420px;
+  }
+}
+
+.detail-body {
+  margin-top: 10px;
+  padding: 18px;
+}
+
+.origin-tag {
+  margin-left: auto;
+  width: fit-content;
+  color: #ff8a00;
+  border: 1px solid #ffd4a3;
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+.detail-body h1 {
+  margin: 14px 0 18px;
+  text-align: center;
+  font-size: 28px;
+  color: #222;
+}
+
+.article-content :deep(.v-note-wrapper) {
+  border: none !important;
+  box-shadow: none !important;
+  min-height: unset !important;
+}
+
+.article-content :deep(.v-note-show) {
+  padding: 0 !important;
+}
+
+.tag-wrap {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  button {
+    border: 1px solid #d8f5f2;
+    background: #effcfb;
+    color: #0e8f87;
+    border-radius: 16px;
+    padding: 0 10px;
+    line-height: 26px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+}
+
+.detail-info {
+  margin-top: 10px;
+  border-left: 4px solid #8be0d8;
+  padding: 12px 14px;
+
+  p {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #51575f;
+
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 
-  .article-title {
-    font-size: 26px;
-    font-weight: 700;
-    color: #303133;
-    margin: 0 0 16px;
-    line-height: 1.4;
+  a {
+    color: var(--blog-brand-dark);
+    text-decoration: none;
   }
+}
 
-  .article-meta {
-    display: flex;
+@media (max-width: 640px) {
+  .detail-head {
     flex-wrap: wrap;
-    gap: 20px;
-    font-size: 13px;
-    color: #909399;
-    margin-bottom: 16px;
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-
-      a {
-        color: #909399;
-        text-decoration: none;
-
-        &:hover {
-          color: #409EFF;
-        }
-      }
-    }
+    gap: 10px;
   }
 
-  .article-tags {
-    margin-bottom: 24px;
-  }
-
-  .article-body {
-    border-top: 1px solid #f0f0f0;
-    padding-top: 24px;
-
-    :deep(.v-note-wrapper) {
-      border: none !important;
-      box-shadow: none !important;
-      min-height: unset !important;
-    }
-
-    :deep(.v-note-show) {
-      padding: 0 !important;
-    }
-  }
-}
-
-@media (max-width: 800px) {
-  .page-inner {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    display: none;
+  .detail-body h1 {
+    font-size: 22px;
   }
 }
 </style>

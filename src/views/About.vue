@@ -1,130 +1,151 @@
 <template>
   <div class="page-about">
-    <div class="page-inner">
-      <main class="main-content">
-        <el-card class="about-card" shadow="never">
-          <div v-if="loading" v-loading="loading" style="min-height:200px" />
-          <div v-else>
-            <h1 class="about-title">关于</h1>
-            <div
-              class="about-content"
-              v-html="aboutContent"
-            />
+    <div class="about-top">
+      <section class="about-cover">
+        <img :src="coverImage" alt="cover">
+      </section>
 
-            <div v-if="socialLinks.length" class="social-section">
-              <h2>社交方式</h2>
-              <div class="social-links">
-                <a
-                  v-for="item in socialLinks"
-                  :key="item.key"
-                  :href="item.href"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="social-link"
-                >
-                  <i :class="item.icon" />
-                  <span>{{ item.label }}</span>
-                </a>
-              </div>
-            </div>
+      <section class="about-profile">
+        <h2>关于我</h2>
+        <p class="about-text">{{ aboutText }}</p>
 
-            <!-- 友情链接 -->
-            <div v-if="links.length" class="links-section">
-              <h2>友情链接</h2>
-              <div class="links-grid">
-                <a
-                  v-for="link in links"
-                  :key="link.id"
-                  :href="link.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="link-item"
-                >
-                  <img v-if="link.logo" :src="link.logo" :alt="link.name" class="link-logo" />
-                  <div class="link-info">
-                    <span class="link-name">{{ link.name }}</span>
-                    <span class="link-desc">{{ link.description }}</span>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </main>
-      <app-sidebar class="sidebar" />
+        <div class="interest-list">
+          <span>编程</span>
+          <span>学习</span>
+          <span>分享</span>
+          <span>成长</span>
+        </div>
+
+        <div class="skill-list">
+          <span v-for="item in skillTags" :key="item">{{ item }}</span>
+        </div>
+
+        <div class="social-links">
+          <a
+            v-for="item in socialLinks"
+            :key="item.key"
+            :href="item.href"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ item.label }}</a>
+        </div>
+      </section>
     </div>
+
+    <section class="link-panel" v-loading="loading">
+      <h3>友情链接</h3>
+      <div class="link-grid" v-if="normalizedLinks.length">
+        <a
+          v-for="link in normalizedLinks"
+          :key="link.id"
+          :href="link.safeUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-item"
+        >
+          <img v-if="link.logo" :src="link.logo" :alt="link.name">
+          <div>
+            <p>{{ link.name }}</p>
+            <span>{{ link.description || '欢迎互访交流' }}</span>
+          </div>
+        </a>
+      </div>
+      <el-empty v-else-if="!loading" description="暂无友情链接" />
+    </section>
+
+    <section class="about-html">
+      <h3>更多介绍</h3>
+      <div class="content" v-html="aboutContent" />
+    </section>
   </div>
 </template>
 
 <script>
-import AppSidebar from '../components/AppSidebar.vue'
 import { getLinks } from '@/api/blog'
 import DOMPurify from 'dompurify'
 
 export default {
   name: 'AboutView',
-  components: { AppSidebar },
   data () {
     return {
       links: [],
-      loading: false
+      loading: false,
+      defaultCover: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80'
     }
   },
   computed: {
     configMap () {
       return this.$store.getters.configMap || {}
     },
+    coverImage () {
+      return this.configMap.site_avatar || this.defaultCover
+    },
     aboutContent () {
       const raw = this.configMap.site_about || '<p>欢迎来到我的博客！</p>'
       return DOMPurify.sanitize(raw)
     },
+    aboutText () {
+      const raw = this.aboutContent.replace(/<[^>]+>/g, '').trim()
+      if (!raw) {
+        return '一个热爱技术、持续学习的开发者。'
+      }
+      return raw.slice(0, 120)
+    },
+    skillTags () {
+      const tags = this.$store.getters.tags || []
+      if (!tags.length) {
+        return ['Java', 'Spring', 'Vue', 'MySQL', 'Linux', 'Nginx']
+      }
+      return tags.slice(0, 8).map(item => item.name)
+    },
     socialLinks () {
       const links = []
-      const github = (this.configMap.social_github || '').trim()
-      const gitee = (this.configMap.social_gitee || '').trim()
+      const github = this.safeHttpUrl(this.configMap.social_github)
+      const gitee = this.safeHttpUrl(this.configMap.social_gitee)
       const email = (this.configMap.social_email || '').trim()
       const qq = (this.configMap.social_qq || '').trim()
 
       if (github) {
-        links.push({
-          key: 'github',
-          label: 'GitHub',
-          href: /^https?:\/\//i.test(github) ? github : `https://${github}`,
-          icon: 'el-icon-link'
-        })
+        links.push({ key: 'github', label: 'GitHub', href: github })
       }
       if (gitee) {
-        links.push({
-          key: 'gitee',
-          label: 'Gitee',
-          href: /^https?:\/\//i.test(gitee) ? gitee : `https://${gitee}`,
-          icon: 'el-icon-link'
-        })
+        links.push({ key: 'gitee', label: 'Gitee', href: gitee })
       }
       if (email) {
-        links.push({
-          key: 'email',
-          label: '邮箱',
-          href: `mailto:${email}`,
-          icon: 'el-icon-message'
-        })
+        links.push({ key: 'email', label: '邮箱', href: `mailto:${email}` })
       }
       if (qq) {
-        links.push({
-          key: 'qq',
-          label: `QQ: ${qq}`,
-          href: `https://wpa.qq.com/msgrd?v=3&uin=${qq}&site=qq&menu=yes`,
-          icon: 'el-icon-chat-dot-round'
-        })
+        links.push({ key: 'qq', label: `QQ ${qq}`, href: `https://wpa.qq.com/msgrd?v=3&uin=${qq}&site=qq&menu=yes` })
       }
 
       return links
+    },
+    normalizedLinks () {
+      return this.links
+        .map(item => ({
+          ...item,
+          safeUrl: this.safeHttpUrl(item.url)
+        }))
+        .filter(item => !!item.safeUrl)
     }
   },
   created () {
     this.fetchLinks()
   },
   methods: {
+    safeHttpUrl (value) {
+      const url = (value || '').trim()
+      if (!url) {
+        return ''
+      }
+      if (/^https?:\/\//i.test(url)) {
+        return url
+      }
+      if (/^[a-zA-Z]+:/i.test(url)) {
+        return ''
+      }
+      return `https://${url}`
+    },
     async fetchLinks () {
       this.loading = true
       try {
@@ -142,115 +163,175 @@ export default {
 
 <style lang="scss" scoped>
 .page-about {
-  max-width: 1100px;
-  margin: 32px auto;
-  padding: 0 20px;
+  max-width: 1120px;
+  margin: 24px auto 0;
+  padding: 0 18px;
 }
-.page-inner {
+
+.about-top,
+.link-panel,
+.about-html {
+  background: #fff;
+  border: 1px solid var(--blog-border);
+  border-radius: 6px;
+  box-shadow: var(--blog-shadow);
+}
+
+.about-top {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 32px;
+  grid-template-columns: 2fr 1fr;
+  gap: 0;
+  overflow: hidden;
 }
-.about-card {
-  border-radius: 8px;
+
+.about-cover img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
 }
-.about-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #303133;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
-}
-.about-content {
-  font-size: 15px;
-  color: #606266;
-  line-height: 1.8;
-}
-.social-section {
-  margin-top: 28px;
+
+.about-profile {
+  padding: 18px;
+  border-left: 1px solid #eef0f2;
+
   h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #303133;
-    margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    margin: 0;
+    color: var(--blog-brand-dark);
+    font-size: 24px;
   }
 }
+
+.about-text {
+  margin: 12px 0;
+  color: #525963;
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.interest-list,
+.skill-list,
 .social-links {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.interest-list span,
+.skill-list span {
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid #e0e4ea;
+  color: #5e6670;
+}
+
+.skill-list span {
+  background: #effcfb;
+  border-color: #c8f0ec;
+  color: #0f8f88;
+}
+
+.social-links a {
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 14px;
+  border: 1px solid #dce0e8;
+  color: #4f5761;
+  padding: 4px 10px;
+
+  &:hover {
+    color: var(--blog-brand-dark);
+    border-color: rgba(0, 181, 173, 0.4);
+  }
+}
+
+.link-panel {
+  margin-top: 12px;
+  padding: 14px;
+
+  h3 {
+    margin: 0 0 12px;
+    color: #2f3237;
+    font-size: 20px;
+  }
+}
+
+.link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
 }
-.social-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border: 1px solid #e8e8e8;
-  border-radius: 20px;
-  color: #606266;
-  text-decoration: none;
-  font-size: 13px;
-  transition: color .2s, border-color .2s;
-  &:hover {
-    color: #409EFF;
-    border-color: #b3d8ff;
-  }
-}
-.links-section {
-  margin-top: 40px;
-  h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #303133;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-}
-.links-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
+
 .link-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
+  gap: 10px;
+  border: 1px solid #ebedf0;
+  border-radius: 6px;
+  padding: 10px;
   text-decoration: none;
-  transition: box-shadow .2s, transform .2s;
+
   &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,.1);
-    transform: translateY(-2px);
+    border-color: rgba(0, 181, 173, 0.35);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   }
-  .link-logo {
-    width: 40px;
-    height: 40px;
+
+  img {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
   }
-  .link-info {
-    display: flex;
-    flex-direction: column;
-    .link-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #303133;
-    }
-    .link-desc {
-      font-size: 12px;
-      color: #909399;
-      margin-top: 2px;
-    }
+
+  p {
+    margin: 0;
+    color: #2f3237;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  span {
+    color: #868b93;
+    font-size: 12px;
   }
 }
-@media (max-width: 800px) {
-  .page-inner { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+
+.about-html {
+  margin-top: 12px;
+  padding: 14px;
+
+  h3 {
+    margin: 0 0 10px;
+    color: #2f3237;
+    font-size: 20px;
+  }
+}
+
+.content {
+  color: #444;
+  line-height: 1.85;
+  font-size: 14px;
+}
+
+.content :deep(img) {
+  max-width: 100%;
+}
+
+@media (max-width: 920px) {
+  .about-top {
+    grid-template-columns: 1fr;
+  }
+
+  .about-cover img {
+    min-height: 260px;
+  }
+
+  .about-profile {
+    border-left: none;
+    border-top: 1px solid #eef0f2;
+  }
 }
 </style>

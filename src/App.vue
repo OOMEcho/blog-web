@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <app-header />
-    <router-view />
+    <router-view class="app-view" />
     <app-footer />
   </div>
 </template>
@@ -20,6 +20,17 @@ export default {
 </script>
 
 <style>
+:root {
+  --blog-brand: #00b5ad;
+  --blog-brand-dark: #009c95;
+  --blog-bg: #f5f5f5;
+  --blog-card: #ffffff;
+  --blog-text: #333333;
+  --blog-muted: #7d8087;
+  --blog-border: #e8e8e8;
+  --blog-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -27,16 +38,26 @@ export default {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f5f7fa;
-  color: #303133;
+  background-color: var(--blog-bg);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.045) 1px, transparent 1px);
+  background-size: 12px 12px;
+  color: var(--blog-text);
+}
+
+a {
+  color: inherit;
 }
 
 #app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.app-view {
+  flex: 1;
 }
 </style>
