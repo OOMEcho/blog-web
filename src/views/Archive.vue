@@ -72,7 +72,7 @@ export default {
       this.loading = true
       try {
         const res = await getArchives()
-        this.articles = (res && res.data) ? res.data : (Array.isArray(res) ? res : [])
+        this.articles = Array.isArray(res) ? res : []
       } catch (e) {
         this.articles = []
       } finally {

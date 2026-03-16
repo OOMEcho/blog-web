@@ -102,7 +102,7 @@ export default {
       this.loading = true
       try {
         const res = await getArticleDetail(this.$route.params.id)
-        this.article = (res && res.data) ? res.data : res
+        this.article = res || null
       } catch (e) {
         this.article = null
       } finally {

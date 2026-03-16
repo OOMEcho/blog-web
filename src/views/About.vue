@@ -129,7 +129,7 @@ export default {
       this.loading = true
       try {
         const res = await getLinks()
-        this.links = (res && res.data) ? res.data : (Array.isArray(res) ? res : [])
+        this.links = Array.isArray(res) ? res : []
       } catch (e) {
         this.links = []
       } finally {

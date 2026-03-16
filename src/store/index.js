@@ -35,22 +35,19 @@ export default new Vuex.Store({
   actions: {
     async fetchBlogConfig ({ commit }) {
       const { getBlogConfig, getCategories, getTags } = await import('../api/blog')
-      const [cfgRes, catRes, tagRes] = await Promise.all([
+      const results = await Promise.allSettled([
         getBlogConfig(),
         getCategories(),
         getTags()
       ])
-      if (cfgRes && cfgRes.code === 200) {
-        commit('SET_BLOG_CONFIG', cfgRes.data)
-      } else {
-        commit('SET_BLOG_CONFIG', [])
-      }
-      if (catRes && catRes.code === 200) {
-        commit('SET_CATEGORIES', catRes.data)
-      }
-      if (tagRes && tagRes.code === 200) {
-        commit('SET_TAGS', tagRes.data)
-      }
+
+      const cfgRes = results[0].status === 'fulfilled' ? results[0].value : []
+      const catRes = results[1].status === 'fulfilled' ? results[1].value : []
+      const tagRes = results[2].status === 'fulfilled' ? results[2].value : []
+
+      commit('SET_BLOG_CONFIG', cfgRes)
+      commit('SET_CATEGORIES', Array.isArray(catRes) ? catRes : [])
+      commit('SET_TAGS', Array.isArray(tagRes) ? tagRes : [])
     }
   },
   modules: {}

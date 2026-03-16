@@ -75,15 +75,11 @@ export default {
           pageSize: this.pageSize,
           tagId: this.tagId
         })
-        if (res && res.data) {
-          this.articles = res.data.records || res.data || []
-          this.total = res.data.total || this.articles.length
-        } else {
-          this.articles = []
-          this.total = 0
-        }
+        this.articles = Array.isArray(res && res.records) ? res.records : []
+        this.total = Number((res && res.total) || 0)
       } catch (e) {
         this.articles = []
+        this.total = 0
       } finally {
         this.loading = false
       }
