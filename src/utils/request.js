@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
-import { clearAccessToken, getAccessToken } from './auth'
 
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
@@ -8,14 +7,7 @@ const service = axios.create({
 })
 
 service.interceptors.request.use(
-  config => {
-    const token = getAccessToken()
-    if (token) {
-      config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
+  config => config,
   error => Promise.reject(error)
 )
 
@@ -26,9 +18,6 @@ service.interceptors.response.use(
     if (res === undefined || res === null) return res
     // 统一响应格式 { code, msg, data }
     if (res.code !== undefined && res.code !== 200) {
-      if (res.code === 401 || res.code === 406) {
-        clearAccessToken()
-      }
       const errorMsg = res.msg || res.message || '请求失败'
       Message({ message: errorMsg, type: 'error', duration: 3000 })
       return Promise.reject(new Error(errorMsg))

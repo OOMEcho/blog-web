@@ -39,13 +39,3 @@ export function getLinks () {
 export function getBlogConfig () {
   return request.get('/blog/config')
 }
-
-// ========== 评论 ==========
-
-export function getComments (articleId) {
-  return request.get(`/blog/comments/${articleId}`)
-}
-
-export function addComment (data) {
-  return request.post('/blog/comments', data)
-}
