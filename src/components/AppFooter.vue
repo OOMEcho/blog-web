@@ -1,47 +1,42 @@
 <template>
   <footer class="app-footer">
     <div class="footer-inner">
-      <div class="footer-grid">
-        <section class="footer-col">
-          <h4>站点</h4>
-          <p class="site-title">{{ siteName }}</p>
-          <p class="site-desc">{{ siteDesc }}</p>
-        </section>
-
-        <section class="footer-col">
-          <h4>联系我</h4>
-          <p v-if="configMap.social_qq">QQ：{{ configMap.social_qq }}</p>
-          <p v-if="configMap.social_email">Email：{{ configMap.social_email }}</p>
-          <p v-if="!configMap.social_qq && !configMap.social_email">欢迎通过站内资料页联系我</p>
-        </section>
-
-        <section class="footer-col">
-          <h4>相关链接</h4>
-          <div class="footer-links">
-            <a v-for="item in socialLinks" :key="item.name" :href="item.url" target="_blank" rel="noopener noreferrer">
-              {{ item.name }}
-            </a>
-            <router-link v-if="!socialLinks.length" to="/about">关于我</router-link>
-          </div>
-        </section>
-
-        <section class="footer-col">
-          <h4>导航</h4>
-          <div class="footer-links">
-            <router-link to="/">首页</router-link>
-            <router-link to="/category/-1">分类</router-link>
-            <router-link to="/tag/-1">标签</router-link>
-            <router-link to="/archive">归档</router-link>
-          </div>
-        </section>
-      </div>
-
       <div class="footer-bottom">
-        <p>
-          Copyright © {{ currentYear }} {{ siteName }}
-          <span v-if="icp"> | ICP：{{ icp }}</span>
+        <p class="footer-line">
+          <span>© 2020-{{ currentYear }}</span>
+          <span class="dot">·</span>
+          <span>{{ siteFooter || '记录与分享，保持热爱' }}</span>
         </p>
-        <p>{{ runtimeText }}</p>
+
+        <p class="footer-line">
+          <span>ICP证：</span>
+          <a
+            v-if="icpNumber"
+            :href="icpUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ icpNumber }}</a>
+          <span v-else class="muted">未配置ICP备案号</span>
+
+          <span class="dot">|</span>
+
+          <img
+            v-if="!beianIconError"
+            src="/images/beian.png"
+            alt="备案图标"
+            class="beian-icon"
+            @error="beianIconError = true"
+          >
+          <a
+            v-if="publicSecurityRecord"
+            :href="publicSecurityUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ publicSecurityRecord }}</a>
+          <span v-else class="muted">未配置公安备案号</span>
+        </p>
+
+        <p class="footer-line runtime">{{ runtimeText }}</p>
       </div>
     </div>
   </footer>
@@ -54,6 +49,7 @@ export default {
     return {
       now: Date.now(),
       timer: null,
+      beianIconError: false,
       siteStart: new Date('2020/08/18 00:00:00').getTime()
     }
   },
@@ -61,30 +57,26 @@ export default {
     configMap () {
       return this.$store.getters.configMap || {}
     },
-    siteName () {
-      return this.configMap.site_name || '我的博客'
+    siteFooter () {
+      return (this.configMap.site_footer || '').trim()
     },
-    siteDesc () {
-      return this.configMap.site_footer || this.configMap.site_description || '分享学习记录与技术笔记'
+    icpNumber () {
+      return (this.configMap.site_record_number || '').trim()
     },
-    icp () {
-      return this.configMap.site_record_number || ''
+    icpUrl () {
+      return this.normalizeUrl(this.configMap.site_record_url, 'https://beian.miit.gov.cn')
+    },
+    publicSecurityRecord () {
+      return (this.configMap.site_public_security_record_number || '').trim()
+    },
+    publicSecurityUrl () {
+      return this.normalizeUrl(
+        this.configMap.site_public_security_record_url,
+        'http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51172402000111'
+      )
     },
     currentYear () {
       return new Date(this.now).getFullYear()
-    },
-    socialLinks () {
-      const links = []
-      const github = this.normalizeUrl(this.configMap.social_github)
-      const gitee = this.normalizeUrl(this.configMap.social_gitee)
-
-      if (github) {
-        links.push({ name: 'GitHub', url: github })
-      }
-      if (gitee) {
-        links.push({ name: 'Gitee', url: gitee })
-      }
-      return links
     },
     runtimeText () {
       const diff = this.now - this.siteStart
@@ -111,12 +103,18 @@ export default {
     }
   },
   methods: {
-    normalizeUrl (url) {
-      const value = (url || '').trim()
-      if (!value) {
-        return ''
+    normalizeUrl (value, fallback) {
+      const raw = (value || '').trim()
+      if (!raw) {
+        return fallback
       }
-      return /^https?:\/\//i.test(value) ? value : `https://${value}`
+      if (/^https?:\/\//i.test(raw)) {
+        return raw
+      }
+      if (/^[a-zA-Z]+:/i.test(raw)) {
+        return fallback
+      }
+      return `https://${raw}`
     }
   }
 }
@@ -124,10 +122,10 @@ export default {
 
 <style lang="scss" scoped>
 .app-footer {
-  margin-top: 48px;
+  margin-top: 36px;
   background: #1b1c1d;
   color: rgba(255, 255, 255, 0.75);
-  padding: 34px 20px 16px;
+  padding: 20px 20px 16px;
 }
 
 .footer-inner {
@@ -135,71 +133,51 @@ export default {
   margin: 0 auto;
 }
 
-.footer-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
-}
-
-.footer-col {
-  h4 {
-    color: var(--blog-brand);
-    margin-bottom: 10px;
-    font-size: 15px;
-  }
-
-  p {
-    font-size: 13px;
-    line-height: 1.7;
-    margin-bottom: 4px;
-  }
-}
-
-.site-title {
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.footer-links {
+.footer-bottom {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
 
   a {
-    color: rgba(255, 255, 255, 0.78);
+    color: rgba(255, 255, 255, 0.82);
     text-decoration: none;
-    font-size: 13px;
 
     &:hover {
-      color: #fff;
+      color: #ffffff;
       text-decoration: underline;
     }
   }
 }
 
-.footer-bottom {
-  margin-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 12px;
-  text-align: center;
-
-  p {
-    margin: 4px 0;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
-  }
+.footer-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.66);
 }
 
-@media (max-width: 900px) {
-  .footer-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.dot {
+  opacity: 0.45;
 }
 
-@media (max-width: 640px) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-  }
+.muted {
+  opacity: 0.55;
+}
+
+.beian-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+.runtime {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2px;
 }
 </style>
