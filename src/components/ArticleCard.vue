@@ -10,7 +10,11 @@
 
         <div class="card-meta">
           <span class="meta-item author">
-            <img :src="article.authorAvatar || defaultAvatar" alt="author">
+            <img
+              :src="resolveAuthorAvatar(article.authorAvatar)"
+              alt="author"
+              @error="onAvatarError"
+            >
             <em>{{ article.authorName || '博主' }}</em>
           </span>
           <span class="meta-item"><i class="el-icon-date" /> {{ formatDate(article.createTime) }}</span>
@@ -58,7 +62,7 @@ export default {
   },
   data () {
     return {
-      defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea0722f.png'
+      defaultAvatar: '/images/default-avatar.png'
     }
   },
   computed: {
@@ -80,6 +84,21 @@ export default {
   },
   methods: {
     formatDate,
+    resolveAuthorAvatar (avatar) {
+      const value = (avatar || '').trim()
+      return value || this.defaultAvatar
+    },
+    onAvatarError (event) {
+      const img = event && event.target
+      if (!img) {
+        return
+      }
+      if (img.dataset.fallbackApplied === '1') {
+        return
+      }
+      img.dataset.fallbackApplied = '1'
+      img.src = this.defaultAvatar
+    },
     tagStyle (tag) {
       return buildTagStyle(tag && tag.color)
     },
