@@ -163,7 +163,8 @@ export default {
 
 <style lang="scss" scoped>
 .page-about {
-  max-width: 1120px;
+  width: 100%;
+  max-width: var(--content-width);
   margin: 24px auto 0;
   padding: 0 18px;
 }
