@@ -2,7 +2,7 @@
   <div class="page-archive">
     <div class="archive-shell">
       <section class="archive-head">
-        <h1>归档</h1>
+        <h1><i class="el-icon-collection" /> 归档</h1>
         <p>共 <span>{{ articles.length }}</span> 篇文章</p>
       </section>
 
@@ -102,7 +102,7 @@ export default {
 }
 
 .archive-head {
-  padding: 16px 18px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -110,13 +110,16 @@ export default {
   h1 {
     margin: 0;
     color: var(--blog-brand-dark);
-    font-size: 24px;
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
   p {
     margin: 0;
     color: #666;
-    font-size: 15px;
+    font-size: 14px;
   }
 
   span {

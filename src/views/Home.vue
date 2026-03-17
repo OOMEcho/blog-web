@@ -2,9 +2,9 @@
   <div class="page-home">
     <div class="page-inner">
       <main class="main-content">
-        <section class="home-top">
-          <h1>{{ configMap.site_name || '我的博客' }}</h1>
-          <p>{{ configMap.site_notice || '记录学习、思考与实践，欢迎一起交流。' }}</p>
+        <section class="page-title">
+          <h1><i class="el-icon-document" /> 文章</h1>
+          <p>共 <span>{{ total }}</span> 篇</p>
         </section>
 
         <div v-if="keyword" class="search-hint">
@@ -59,9 +59,6 @@ export default {
   computed: {
     keyword () {
       return this.$route.query.keyword || ''
-    },
-    configMap () {
-      return this.$store.getters.configMap || {}
     }
   },
   watch: {
@@ -118,24 +115,35 @@ export default {
   gap: 18px;
 }
 
-.home-top {
+.page-title {
   background: #fff;
   border: 1px solid var(--blog-border);
   border-radius: 6px;
   box-shadow: var(--blog-shadow);
-  padding: 16px 18px;
+  padding: 12px 16px;
   margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   h1 {
     margin: 0;
     color: var(--blog-brand-dark);
-    font-size: 22px;
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
   p {
-    margin: 8px 0 0;
-    color: #6f747b;
+    margin: 0;
+    color: #666;
     font-size: 14px;
+  }
+
+  span {
+    color: #ff8a00;
+    font-weight: 700;
   }
 }
 
@@ -165,6 +173,12 @@ export default {
 
   .sidebar {
     display: none;
+  }
+
+  .page-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 </style>

@@ -7,11 +7,11 @@
         </div>
 
         <nav class="nav-links">
-          <router-link to="/" exact>首页</router-link>
-          <router-link to="/category/-1">分类</router-link>
-          <router-link to="/tag/-1">标签</router-link>
-          <router-link to="/archive">归档</router-link>
-          <router-link to="/about">关于我</router-link>
+          <router-link to="/" exact><i class="el-icon-house" /> 首页</router-link>
+          <router-link to="/category/-1"><i class="el-icon-folder-opened" /> 分类</router-link>
+          <router-link to="/tag/-1"><i class="el-icon-price-tag" /> 标签</router-link>
+          <router-link to="/archive"><i class="el-icon-collection" /> 归档</router-link>
+          <router-link to="/about"><i class="el-icon-user" /> 关于我</router-link>
         </nav>
 
         <form class="search-form" @submit.prevent="handleSearch(keyword)">
@@ -34,11 +34,11 @@
       <transition name="header-fade">
         <div v-if="mobileOpen" class="mobile-panel">
           <div class="mobile-nav">
-            <router-link to="/" exact @click.native="mobileOpen = false">首页</router-link>
-            <router-link to="/category/-1" @click.native="mobileOpen = false">分类</router-link>
-            <router-link to="/tag/-1" @click.native="mobileOpen = false">标签</router-link>
-            <router-link to="/archive" @click.native="mobileOpen = false">归档</router-link>
-            <router-link to="/about" @click.native="mobileOpen = false">关于我</router-link>
+            <router-link to="/" exact @click.native="mobileOpen = false"><i class="el-icon-house" /> 首页</router-link>
+            <router-link to="/category/-1" @click.native="mobileOpen = false"><i class="el-icon-folder-opened" /> 分类</router-link>
+            <router-link to="/tag/-1" @click.native="mobileOpen = false"><i class="el-icon-price-tag" /> 标签</router-link>
+            <router-link to="/archive" @click.native="mobileOpen = false"><i class="el-icon-collection" /> 归档</router-link>
+            <router-link to="/about" @click.native="mobileOpen = false"><i class="el-icon-user" /> 关于我</router-link>
           </div>
           <form class="mobile-search" @submit.prevent="handleSearch(mobileKeyword)">
             <input
@@ -80,8 +80,20 @@ export default {
     this.syncKeywordFromRoute()
   },
   methods: {
+    safePush (location) {
+      return this.$router.push(location).catch(err => {
+        if (err && err.name !== 'NavigationDuplicated') {
+          throw err
+        }
+      })
+    },
     goHome () {
-      this.$router.push('/')
+      const isHome = this.$route.path === '/'
+      const hasQuery = Object.keys(this.$route.query || {}).length > 0
+      if (isHome && !hasQuery) {
+        return
+      }
+      this.safePush({ path: '/' })
     },
     syncKeywordFromRoute () {
       const routeKeyword = (this.$route.query.keyword || '').trim()
@@ -94,9 +106,13 @@ export default {
       this.mobileKeyword = searchValue
 
       if (searchValue) {
-        this.$router.push({ path: '/', query: { keyword: searchValue } })
+        if (this.$route.path === '/' && (this.$route.query.keyword || '') === searchValue) {
+          this.mobileOpen = false
+          return
+        }
+        this.safePush({ path: '/', query: { keyword: searchValue } })
       } else {
-        this.$router.push({ path: '/' })
+        this.goHome()
       }
 
       this.mobileOpen = false
@@ -144,10 +160,13 @@ export default {
   align-items: center;
   gap: 4px;
 
-  a {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    text-decoration: none;
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      text-decoration: none;
     padding: 8px 14px;
     border-radius: 4px;
     transition: all 0.2s ease;
@@ -248,6 +267,9 @@ export default {
     margin-bottom: 10px;
 
     a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       color: rgba(255, 255, 255, 0.86);
       text-decoration: none;
       padding: 8px 10px;

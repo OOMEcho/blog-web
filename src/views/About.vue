@@ -6,7 +6,7 @@
       </section>
 
       <section class="about-profile">
-        <h2>关于我</h2>
+        <h2><i class="el-icon-user" /> 关于我</h2>
         <p class="about-text">{{ aboutText }}</p>
 
         <div class="interest-list">
@@ -199,6 +199,9 @@ export default {
     margin: 0;
     color: var(--blog-brand-dark);
     font-size: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 

@@ -1,24 +1,23 @@
 <template>
   <aside class="sidebar">
-    <section class="side-card author-card">
-      <img class="author-avatar" :src="configMap.site_avatar || defaultAvatar" alt="avatar">
-      <h3 class="author-name">{{ configMap.site_author || '博主' }}</h3>
-      <p class="author-desc">{{ configMap.site_description || '记录日常学习与技术沉淀' }}</p>
-    </section>
-
     <section v-if="configMap.site_notice" class="side-card">
       <h4 class="card-title"><i class="el-icon-bell" /> 公告</h4>
       <p class="notice-text">{{ configMap.site_notice }}</p>
     </section>
 
     <section class="side-card">
-      <h4 class="card-title"><i class="el-icon-folder" /> 分类</h4>
+      <div class="card-head">
+        <h4 class="card-title"><i class="el-icon-folder" /> 分类</h4>
+        <router-link class="more-link" to="/category/-1" aria-label="查看全部分类">
+          更多 <span class="arrow">&gt;&gt;</span>
+        </router-link>
+      </div>
       <ul class="count-list">
         <li @click="$router.push('/category/-1')">
           <span>全部分类</span>
           <em>{{ allCategoryCount }}</em>
         </li>
-        <li v-for="cat in categories" :key="cat.id" @click="$router.push(`/category/${cat.id}`)">
+        <li v-for="cat in displayCategories" :key="cat.id" @click="$router.push(`/category/${cat.id}`)">
           <span>{{ cat.name }}</span>
           <em>{{ toCount(cat.articleCount) }}</em>
         </li>
@@ -26,7 +25,12 @@
     </section>
 
     <section class="side-card">
-      <h4 class="card-title"><i class="el-icon-price-tag" /> 标签</h4>
+      <div class="card-head">
+        <h4 class="card-title"><i class="el-icon-price-tag" /> 标签</h4>
+        <router-link class="more-link" to="/tag/-1" aria-label="查看全部标签">
+          更多 <span class="arrow">&gt;&gt;</span>
+        </router-link>
+      </div>
       <div class="tag-cloud">
         <button
           type="button"
@@ -34,7 +38,7 @@
           @click="$router.push('/tag/-1')"
         >全部<span>{{ allTagCount }}</span></button>
         <button
-          v-for="tag in tags"
+          v-for="tag in displayTags"
           :key="tag.id"
           type="button"
           class="tag-item"
@@ -67,7 +71,6 @@ export default {
   name: 'AppSidebar',
   data () {
     return {
-      defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea0722f.png',
       recommendList: [],
       recommendLoading: false
     }
@@ -81,6 +84,12 @@ export default {
     },
     tags () {
       return this.$store.getters.tags || []
+    },
+    displayCategories () {
+      return this.sortByCount(this.categories).slice(0, 8)
+    },
+    displayTags () {
+      return this.sortByCount(this.tags).slice(0, 8)
     },
     allCategoryCount () {
       return this.categories.reduce((sum, item) => sum + this.toCount(item.articleCount), 0)
@@ -97,6 +106,15 @@ export default {
     toCount (value) {
       const count = Number(value)
       return Number.isFinite(count) && count > 0 ? count : 0
+    },
+    sortByCount (list) {
+      return [...list].sort((a, b) => {
+        const countDiff = this.toCount(b.articleCount) - this.toCount(a.articleCount)
+        if (countDiff !== 0) {
+          return countDiff
+        }
+        return Number(a.id || 0) - Number(b.id || 0)
+      })
     },
     async fetchRecommendList () {
       this.recommendLoading = true
@@ -128,38 +146,42 @@ export default {
   padding: 14px;
 }
 
-.author-card {
-  text-align: center;
-}
-
-.author-avatar {
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(0, 181, 173, 0.25);
-}
-
-.author-name {
-  margin: 10px 0 6px;
-  font-size: 16px;
-  color: #222;
-}
-
-.author-desc {
-  margin: 0;
-  font-size: 13px;
-  color: var(--blog-muted);
-  line-height: 1.6;
-}
-
 .card-title {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 15px;
   color: #333;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.more-link {
+  text-decoration: none;
+  color: #9aa0a8;
+  font-size: 12px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  .arrow {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover {
+    color: var(--blog-brand-dark);
+
+    .arrow {
+      transform: translateX(2px);
+    }
+  }
 }
 
 .notice-text {

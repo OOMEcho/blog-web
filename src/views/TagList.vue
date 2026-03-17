@@ -4,8 +4,7 @@
       <main class="main-content">
         <section class="head-segment">
           <div>
-            <h1>标签</h1>
-            <p>按标签筛选文章</p>
+            <h1><i class="el-icon-price-tag" /> 标签</h1>
           </div>
           <div class="head-count">共 {{ tags.length }} 个标签</div>
         </section>
@@ -55,20 +54,17 @@
           </div>
         </section>
       </main>
-
-      <app-sidebar class="sidebar" />
     </div>
   </div>
 </template>
 
 <script>
 import ArticleCard from '../components/ArticleCard.vue'
-import AppSidebar from '../components/AppSidebar.vue'
 import { getArticles } from '@/api/blog'
 
 export default {
   name: 'TagList',
-  components: { ArticleCard, AppSidebar },
+  components: { ArticleCard },
   data () {
     return {
       articles: [],
@@ -150,9 +146,7 @@ export default {
 }
 
 .page-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 18px;
+  display: block;
 }
 
 .head-segment,
@@ -165,7 +159,7 @@ export default {
 }
 
 .head-segment {
-  padding: 14px 16px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -173,13 +167,10 @@ export default {
   h1 {
     margin: 0;
     color: var(--blog-brand-dark);
-    font-size: 24px;
-  }
-
-  p {
-    margin: 6px 0 0;
-    color: #81858d;
-    font-size: 13px;
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 
@@ -246,16 +237,6 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 20px;
-}
-
-@media (max-width: 980px) {
-  .page-inner {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    display: none;
-  }
 }
 
 @media (max-width: 640px) {
