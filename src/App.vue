@@ -13,8 +13,49 @@ import AppFooter from './components/AppFooter.vue'
 export default {
   name: 'App',
   components: { AppHeader, AppFooter },
+  data () {
+    return {
+      live2dLoaded: false
+    }
+  },
   created () {
     this.$store.dispatch('fetchBlogConfig').catch(() => {})
+  },
+  mounted () {
+    this.tryLoadLive2d()
+    window.addEventListener('resize', this.tryLoadLive2d, { passive: true })
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.tryLoadLive2d)
+  },
+  methods: {
+    tryLoadLive2d () {
+      if (this.live2dLoaded || typeof window === 'undefined') {
+        return
+      }
+
+      if (window.innerWidth <= 980) {
+        return
+      }
+
+      const existedScript = document.getElementById('live2d-widget-autoload')
+      if (existedScript) {
+        this.live2dLoaded = true
+        return
+      }
+
+      const script = document.createElement('script')
+      script.id = 'live2d-widget-autoload'
+      script.src = 'https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0/dist/autoload.js'
+      script.async = true
+      script.onerror = () => {
+        this.live2dLoaded = false
+        console.warn('[live2d] widget load failed')
+      }
+
+      document.body.appendChild(script)
+      this.live2dLoaded = true
+    }
   }
 }
 </script>
@@ -62,5 +103,17 @@ a {
 
 .app-view {
   flex: 1;
+}
+
+#waifu,
+#waifu-toggle {
+  z-index: 100 !important;
+}
+
+@media (max-width: 980px) {
+  #waifu,
+  #waifu-toggle {
+    display: none !important;
+  }
 }
 </style>
