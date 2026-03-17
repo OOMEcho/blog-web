@@ -140,7 +140,8 @@ export default {
 
 <style lang="scss" scoped>
 .page-category {
-  max-width: 1120px;
+  width: 100%;
+  max-width: 60em;
   margin: 24px auto 0;
   padding: 0 18px;
 }

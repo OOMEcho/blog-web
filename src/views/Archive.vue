@@ -88,7 +88,8 @@ export default {
 
 <style lang="scss" scoped>
 .page-archive {
-  max-width: 980px;
+  width: 100%;
+  max-width: 60em;
   margin: 24px auto 0;
   padding: 0 18px;
 }
