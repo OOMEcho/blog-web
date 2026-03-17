@@ -1,102 +1,53 @@
 <template>
   <div class="page-about">
-    <div class="about-top">
-      <section class="about-cover">
-        <img :src="coverImage" alt="cover">
-      </section>
+    <section class="about-layout">
+      <aside class="about-left">
+        <img class="avatar" :src="avatarUrl" alt="站点头像">
+      </aside>
 
-      <section class="about-profile">
+      <article class="about-right">
         <h2><i class="el-icon-user" /> 关于我</h2>
-        <p class="about-text">{{ aboutText }}</p>
 
-        <div class="interest-list">
-          <span>编程</span>
-          <span>学习</span>
-          <span>分享</span>
-          <span>成长</span>
-        </div>
+        <div class="about-content" v-html="aboutContent" />
 
-        <div class="skill-list">
-          <span v-for="item in skillTags" :key="item">{{ item }}</span>
-        </div>
-
-        <div class="social-links">
-          <a
-            v-for="item in socialLinks"
-            :key="item.key"
-            :href="item.href"
-            target="_blank"
-            rel="noopener noreferrer"
-          >{{ item.label }}</a>
-        </div>
-      </section>
-    </div>
-
-    <section class="link-panel" v-loading="loading">
-      <h3>友情链接</h3>
-      <div class="link-grid" v-if="normalizedLinks.length">
-        <a
-          v-for="link in normalizedLinks"
-          :key="link.id"
-          :href="link.safeUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="link-item"
-        >
-          <img v-if="link.logo" :src="link.logo" :alt="link.name">
-          <div>
-            <p>{{ link.name }}</p>
-            <span>{{ link.description || '欢迎互访交流' }}</span>
+        <section class="social-block">
+          <h3>社交链接</h3>
+          <div v-if="socialLinks.length" class="social-links">
+            <a
+              v-for="item in socialLinks"
+              :key="item.key"
+              :href="item.href"
+              target="_blank"
+              rel="noopener noreferrer"
+            >{{ item.label }}</a>
           </div>
-        </a>
-      </div>
-      <el-empty v-else-if="!loading" description="暂无友情链接" />
-    </section>
-
-    <section class="about-html">
-      <h3>更多介绍</h3>
-      <div class="content" v-html="aboutContent" />
+          <p v-else class="empty-text">暂无社交链接配置</p>
+        </section>
+      </article>
     </section>
   </div>
 </template>
 
 <script>
-import { getLinks } from '@/api/blog'
 import DOMPurify from 'dompurify'
 
 export default {
   name: 'AboutView',
   data () {
     return {
-      links: [],
-      loading: false,
-      defaultCover: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80'
+      defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea0722f.png'
     }
   },
   computed: {
     configMap () {
       return this.$store.getters.configMap || {}
     },
-    coverImage () {
-      return this.configMap.site_avatar || this.defaultCover
+    avatarUrl () {
+      return (this.configMap.site_avatar || '').trim() || this.defaultAvatar
     },
     aboutContent () {
       const raw = this.configMap.site_about || '<p>欢迎来到我的博客！</p>'
       return DOMPurify.sanitize(raw)
-    },
-    aboutText () {
-      const raw = this.aboutContent.replace(/<[^>]+>/g, '').trim()
-      if (!raw) {
-        return '一个热爱技术、持续学习的开发者。'
-      }
-      return raw.slice(0, 120)
-    },
-    skillTags () {
-      const tags = this.$store.getters.tags || []
-      if (!tags.length) {
-        return ['Java', 'Spring', 'Vue', 'MySQL', 'Linux', 'Nginx']
-      }
-      return tags.slice(0, 8).map(item => item.name)
     },
     socialLinks () {
       const links = []
@@ -112,50 +63,32 @@ export default {
         links.push({ key: 'gitee', label: 'Gitee', href: gitee })
       }
       if (email) {
-        links.push({ key: 'email', label: '邮箱', href: `mailto:${email}` })
+        links.push({ key: 'email', label: email, href: `mailto:${email}` })
       }
       if (qq) {
-        links.push({ key: 'qq', label: `QQ ${qq}`, href: `https://wpa.qq.com/msgrd?v=3&uin=${qq}&site=qq&menu=yes` })
+        links.push({
+          key: 'qq',
+          label: `QQ ${qq}`,
+          href: `https://wpa.qq.com/msgrd?v=3&uin=${qq}&site=qq&menu=yes`
+        })
       }
 
       return links
-    },
-    normalizedLinks () {
-      return this.links
-        .map(item => ({
-          ...item,
-          safeUrl: this.safeHttpUrl(item.url)
-        }))
-        .filter(item => !!item.safeUrl)
     }
-  },
-  created () {
-    this.fetchLinks()
   },
   methods: {
     safeHttpUrl (value) {
-      const url = (value || '').trim()
-      if (!url) {
+      const raw = (value || '').trim()
+      if (!raw) {
         return ''
       }
-      if (/^https?:\/\//i.test(url)) {
-        return url
+      if (/^https?:\/\//i.test(raw)) {
+        return raw
       }
-      if (/^[a-zA-Z]+:/i.test(url)) {
+      if (/^[a-zA-Z]+:/i.test(raw)) {
         return ''
       }
-      return `https://${url}`
-    },
-    async fetchLinks () {
-      this.loading = true
-      try {
-        const res = await getLinks()
-        this.links = Array.isArray(res) ? res : []
-      } catch (e) {
-        this.links = []
-      } finally {
-        this.loading = false
-      }
+      return `https://${raw}`
     }
   }
 }
@@ -169,173 +102,124 @@ export default {
   padding: 0 18px;
 }
 
-.about-top,
-.link-panel,
-.about-html {
+.about-layout {
   background: #fff;
   border: 1px solid var(--blog-border);
   border-radius: 6px;
   box-shadow: var(--blog-shadow);
-}
-
-.about-top {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 0;
+  grid-template-columns: 280px minmax(0, 1fr);
   overflow: hidden;
 }
 
-.about-cover img {
-  width: 100%;
-  height: 100%;
-  min-height: 360px;
-  object-fit: cover;
+.about-left {
+  border-right: 1px solid #edf0f2;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #fbfdfd 0%, #f7fafa 100%);
 }
 
-.about-profile {
-  padding: 18px;
-  border-left: 1px solid #eef0f2;
+.avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(0, 181, 173, 0.18);
+  background: #f3f4f6;
+}
+
+.site-name {
+  margin: 14px 0 0;
+  color: #2f3237;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.about-right {
+  padding: 22px 24px;
 
   h2 {
-    margin: 0;
+    margin: 0 0 14px;
     color: var(--blog-brand-dark);
-    font-size: 24px;
+    font-size: 22px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
   }
 }
 
-.about-text {
-  margin: 12px 0;
-  color: #525963;
-  line-height: 1.8;
+.about-content {
+  color: #454c56;
   font-size: 14px;
+  line-height: 1.9;
 }
 
-.interest-list,
-.skill-list,
-.social-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+.about-content :deep(p) {
+  margin: 0 0 10px;
 }
 
-.interest-list span,
-.skill-list span {
-  border-radius: 14px;
-  padding: 4px 10px;
-  font-size: 12px;
-  border: 1px solid #e0e4ea;
-  color: #5e6670;
-}
-
-.skill-list span {
-  background: #effcfb;
-  border-color: #c8f0ec;
-  color: #0f8f88;
-}
-
-.social-links a {
-  text-decoration: none;
-  font-size: 12px;
-  border-radius: 14px;
-  border: 1px solid #dce0e8;
-  color: #4f5761;
-  padding: 4px 10px;
-
-  &:hover {
-    color: var(--blog-brand-dark);
-    border-color: rgba(0, 181, 173, 0.4);
-  }
-}
-
-.link-panel {
-  margin-top: 12px;
-  padding: 14px;
-
-  h3 {
-    margin: 0 0 12px;
-    color: #2f3237;
-    font-size: 20px;
-  }
-}
-
-.link-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
-}
-
-.link-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #ebedf0;
-  border-radius: 6px;
-  padding: 10px;
-  text-decoration: none;
-
-  &:hover {
-    border-color: rgba(0, 181, 173, 0.35);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-  }
-
-  img {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  p {
-    margin: 0;
-    color: #2f3237;
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  span {
-    color: #868b93;
-    font-size: 12px;
-  }
-}
-
-.about-html {
-  margin-top: 12px;
-  padding: 14px;
-
-  h3 {
-    margin: 0 0 10px;
-    color: #2f3237;
-    font-size: 20px;
-  }
-}
-
-.content {
-  color: #444;
-  line-height: 1.85;
-  font-size: 14px;
-}
-
-.content :deep(img) {
+.about-content :deep(img) {
   max-width: 100%;
 }
 
-@media (max-width: 920px) {
-  .about-top {
+.social-block {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed #e9ecef;
+
+  h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #2f3237;
+  }
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  a {
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 26px;
+    padding: 0 12px;
+    border-radius: 14px;
+    border: 1px solid #dce0e8;
+    color: #4f5761;
+
+    &:hover {
+      color: var(--blog-brand-dark);
+      border-color: rgba(0, 181, 173, 0.4);
+      background: rgba(0, 181, 173, 0.06);
+    }
+  }
+}
+
+.empty-text {
+  margin: 0;
+  font-size: 13px;
+  color: #9197a1;
+}
+
+@media (max-width: 900px) {
+  .about-layout {
     grid-template-columns: 1fr;
   }
 
-  .about-cover img {
-    min-height: 260px;
+  .about-left {
+    border-right: none;
+    border-bottom: 1px solid #edf0f2;
+    padding: 20px 16px;
   }
 
-  .about-profile {
-    border-left: none;
-    border-top: 1px solid #eef0f2;
+  .avatar {
+    width: 140px;
+    height: 140px;
   }
 }
 </style>
