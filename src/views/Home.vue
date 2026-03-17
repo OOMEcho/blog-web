@@ -104,15 +104,16 @@ export default {
 
 <style lang="scss" scoped>
 .page-home {
-  max-width: 1120px;
+  max-width: var(--content-width);
   margin: 24px auto 0;
   padding: 0 18px;
 }
 
 .page-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 18px;
+  grid-template-columns: 11fr 5fr;
+  gap: 20px;
+  align-items: start;
 }
 
 .page-title {

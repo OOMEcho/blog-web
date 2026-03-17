@@ -131,7 +131,7 @@ export default {
 }
 
 .header-shell {
-  max-width: 1120px;
+  max-width: var(--layout-width);
   margin: 0 auto;
   padding: 0 18px;
 }

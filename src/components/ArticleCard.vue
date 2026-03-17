@@ -1,6 +1,6 @@
 <template>
   <article class="article-card">
-    <div class="card-grid">
+    <div class="card-grid" :class="{ 'no-cover': !article.coverImage }">
       <div class="card-main">
         <h2 class="card-title">
           <router-link :to="`/article/${article.id}`">{{ article.title }}</router-link>
@@ -36,9 +36,8 @@
         </div>
       </div>
 
-      <router-link class="cover-wrap" :to="`/article/${article.id}`">
-        <img v-if="article.coverImage" :src="article.coverImage" :alt="article.title">
-        <div v-else class="cover-placeholder">NO IMAGE</div>
+      <router-link v-if="article.coverImage" class="cover-wrap" :to="`/article/${article.id}`">
+        <img :src="article.coverImage" :alt="article.title">
       </router-link>
     </div>
   </article>
@@ -97,9 +96,13 @@ export default {
 
 .card-grid {
   display: grid;
-  grid-template-columns: 1fr 220px;
+  grid-template-columns: 11fr 5fr;
   gap: 18px;
   align-items: center;
+
+  &.no-cover {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card-title {
@@ -199,18 +202,6 @@ export default {
   &:hover img {
     transform: scale(1.04);
   }
-}
-
-.cover-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 12px;
-  letter-spacing: 1px;
-  background: linear-gradient(135deg, #5c6b73, #8999a0);
 }
 
 @media (max-width: 900px) {

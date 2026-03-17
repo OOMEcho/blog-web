@@ -131,7 +131,7 @@ export default {
 }
 
 .footer-inner {
-  max-width: 1120px;
+  max-width: var(--layout-width);
   margin: 0 auto;
 }
 

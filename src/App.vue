@@ -21,6 +21,8 @@ export default {
 
 <style>
 :root {
+  --layout-width: 72em;
+  --content-width: 68em;
   --blog-brand: #00b5ad;
   --blog-brand-dark: #009c95;
   --blog-bg: #f5f5f5;
