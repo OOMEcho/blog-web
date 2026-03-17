@@ -23,6 +23,7 @@
             type="button"
             class="tag-btn"
             :class="{ active: String(tag.id) === String(tagId) }"
+            :style="tagStyle(tag, String(tag.id) === String(tagId))"
             @click="switchTag(tag.id)"
           >{{ tag.name }}<span>{{ toCount(tag.articleCount) }}</span></button>
         </section>
@@ -61,6 +62,7 @@
 <script>
 import ArticleCard from '../components/ArticleCard.vue'
 import { getArticles } from '@/api/blog'
+import { buildTagStyle } from '@/utils/color'
 
 export default {
   name: 'TagList',
@@ -105,6 +107,9 @@ export default {
     this.fetchArticles()
   },
   methods: {
+    tagStyle (tag, active) {
+      return buildTagStyle(tag && tag.color, active)
+    },
     toCount (value) {
       const count = Number(value)
       return Number.isFinite(count) && count > 0 ? count : 0
@@ -201,7 +206,8 @@ export default {
 
   span {
     margin-left: 6px;
-    color: #909399;
+    color: inherit;
+    opacity: 0.92;
   }
 
   &.active {

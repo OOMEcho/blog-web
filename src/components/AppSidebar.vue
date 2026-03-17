@@ -42,6 +42,7 @@
           :key="tag.id"
           type="button"
           class="tag-item"
+          :style="tagStyle(tag)"
           @click="$router.push(`/tag/${tag.id}`)"
         >{{ tag.name }}<span>{{ toCount(tag.articleCount) }}</span></button>
       </div>
@@ -66,6 +67,7 @@
 <script>
 import { getArticles } from '@/api/blog'
 import { formatDate } from '@/utils/format'
+import { buildTagStyle } from '@/utils/color'
 
 export default {
   name: 'AppSidebar',
@@ -103,6 +105,9 @@ export default {
   },
   methods: {
     formatDate,
+    tagStyle (tag) {
+      return buildTagStyle(tag && tag.color)
+    },
     toCount (value) {
       const count = Number(value)
       return Number.isFinite(count) && count > 0 ? count : 0
@@ -247,7 +252,8 @@ export default {
 
   span {
     margin-left: 6px;
-    color: #909399;
+    color: inherit;
+    opacity: 0.92;
   }
 
   &:hover {

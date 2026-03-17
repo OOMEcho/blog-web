@@ -30,6 +30,7 @@
               :key="tag.id"
               type="button"
               class="meta-tag"
+              :style="tagStyle(tag)"
               @click="$router.push(`/tag/${tag.id}`)"
             >{{ tag.name || tag.tagName || '标签' }}</button>
           </span>
@@ -45,6 +46,7 @@
 
 <script>
 import { formatDate, excerpt } from '@/utils/format'
+import { buildTagStyle } from '@/utils/color'
 
 export default {
   name: 'ArticleCard',
@@ -78,6 +80,9 @@ export default {
   },
   methods: {
     formatDate,
+    tagStyle (tag) {
+      return buildTagStyle(tag && tag.color)
+    },
     excerpt
   }
 }
