@@ -4,7 +4,7 @@
       <template v-if="article">
         <section class="detail-head">
           <div class="head-item author">
-            <img :src="article.authorAvatar || defaultAvatar" alt="author">
+            <img :src="resolveAuthorAvatar(article.authorAvatar)" alt="author" @error="onAvatarError">
             <router-link to="/about">{{ article.authorName || '博主' }}</router-link>
           </div>
           <div class="head-item"><i class="el-icon-date" /> {{ formatDate(article.createTime) }}</div>
@@ -70,7 +70,7 @@ export default {
     return {
       article: null,
       loading: false,
-      defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea0722f.png'
+      defaultAvatar: '/images/default-avatar.png'
     }
   },
   computed: {
@@ -97,6 +97,21 @@ export default {
   },
   methods: {
     formatDate,
+    resolveAuthorAvatar (avatar) {
+      const value = (avatar || '').trim()
+      return value || this.defaultAvatar
+    },
+    onAvatarError (event) {
+      const img = event && event.target
+      if (!img) {
+        return
+      }
+      if (img.dataset.fallbackApplied === '1') {
+        return
+      }
+      img.dataset.fallbackApplied = '1'
+      img.src = this.defaultAvatar
+    },
     async fetchDetail () {
       this.loading = true
       try {
