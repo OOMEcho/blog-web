@@ -6,9 +6,9 @@
       </aside>
 
       <article class="about-right">
-        <h2><i class="el-icon-user" /> 关于我</h2>
+        <h2><i class="el-icon-user"/> 关于我</h2>
 
-        <div class="about-content" v-html="aboutContent" />
+        <div class="about-content" v-html="aboutContent"/>
 
         <section class="social-block">
           <h3>社交链接</h3>
@@ -26,40 +26,48 @@
       </article>
     </section>
 
-    <section class="link-panel" v-loading="linkLoading">
-      <h3><i class="el-icon-link" /> 友情链接</h3>
-      <div v-if="normalizedLinks.length" class="link-grid">
+    <section class="project-panel" v-loading="projectLoading">
+      <h3><i class="el-icon-collection"/> 开源项目</h3>
+      <div v-if="normalizedProjects.length" class="project-grid">
         <a
-          v-for="link in normalizedLinks"
-          :key="link.id || link.name"
-          :href="link.safeUrl"
+          v-for="project in normalizedProjects"
+          :key="project.id || project.name"
+          :href="project.safeUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="link-item"
+          class="project-item"
         >
-          <img :src="resolveLinkLogo(link.logo)" :alt="link.name" @error="onLinkLogoError">
-          <div class="link-info">
-            <p>{{ link.name }}</p>
-            <span>{{ link.description || '欢迎互访交流' }}</span>
+          <img :src="resolveLogo(project.logo)" :alt="project.name" @error="onLogoError">
+          <div class="project-info">
+            <div class="project-header">
+              <p>{{ project.name }}</p>
+              <span v-if="project.stars !== null" class="stars">
+                <i class="el-icon-star-off"/> {{ project.stars }}
+              </span>
+            </div>
+            <span class="desc">{{ project.description || '暂无描述' }}</span>
+            <div v-if="project.techStack" class="tech-stack">
+              {{ project.techStack }}
+            </div>
           </div>
         </a>
       </div>
-      <p v-else class="empty-text">暂无友情链接</p>
+      <p v-else class="empty-text">暂无开源项目</p>
     </section>
   </div>
 </template>
 
 <script>
 import DOMPurify from 'dompurify'
-import { getLinks } from '@/api/blog'
+import { getOpenProjects } from '@/api/blog'
 
 export default {
   name: 'AboutView',
   data () {
     return {
       defaultAvatar: '/images/default-avatar.png',
-      links: [],
-      linkLoading: false
+      projects: [],
+      projectLoading: false
     }
   },
   computed: {
@@ -81,13 +89,25 @@ export default {
       const qq = (this.configMap.social_qq || '').trim()
 
       if (github) {
-        links.push({ key: 'github', label: 'GitHub', href: github })
+        links.push({
+          key: 'github',
+          label: 'GitHub',
+          href: github
+        })
       }
       if (gitee) {
-        links.push({ key: 'gitee', label: 'Gitee', href: gitee })
+        links.push({
+          key: 'gitee',
+          label: 'Gitee',
+          href: gitee
+        })
       }
       if (email) {
-        links.push({ key: 'email', label: email, href: `mailto:${email}` })
+        links.push({
+          key: 'email',
+          label: email,
+          href: `mailto:${email}`
+        })
       }
       if (qq) {
         links.push({
@@ -99,17 +119,17 @@ export default {
 
       return links
     },
-    normalizedLinks () {
-      return this.links
-        .map(link => ({
-          ...link,
-          safeUrl: this.safeHttpUrl(link.url)
+    normalizedProjects () {
+      return this.projects
+        .map(project => ({
+          ...project,
+          safeUrl: this.safeHttpUrl(project.url)
         }))
-        .filter(link => !!link.safeUrl)
+        .filter(project => !!project.safeUrl)
     }
   },
   created () {
-    this.fetchLinks()
+    this.fetchProjects()
   },
   methods: {
     onAvatarError (event) {
@@ -123,11 +143,11 @@ export default {
       img.dataset.fallbackApplied = '1'
       img.src = this.defaultAvatar
     },
-    resolveLinkLogo (logo) {
+    resolveLogo (logo) {
       const value = (logo || '').trim()
       return value || this.defaultAvatar
     },
-    onLinkLogoError (event) {
+    onLogoError (event) {
       const img = event && event.target
       if (!img) {
         return
@@ -138,15 +158,15 @@ export default {
       img.dataset.fallbackApplied = '1'
       img.src = this.defaultAvatar
     },
-    async fetchLinks () {
-      this.linkLoading = true
+    async fetchProjects () {
+      this.projectLoading = true
       try {
-        const data = await getLinks()
-        this.links = Array.isArray(data) ? data : []
+        const data = await getOpenProjects()
+        this.projects = Array.isArray(data) ? data : []
       } catch (e) {
-        this.links = []
+        this.projects = []
       } finally {
-        this.linkLoading = false
+        this.projectLoading = false
       }
     },
     safeHttpUrl (value) {
@@ -278,7 +298,7 @@ export default {
   color: #9197a1;
 }
 
-.link-panel {
+.project-panel {
   margin-top: 12px;
   background: #fff;
   border: 1px solid var(--blog-border);
@@ -296,54 +316,93 @@ export default {
   }
 }
 
-.link-grid {
+.project-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
 }
 
-.link-item {
+.project-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 12px;
   text-decoration: none;
   border: 1px solid #e9edf0;
   border-radius: 6px;
-  padding: 10px;
+  padding: 12px;
+  transition: all 0.2s ease;
 
   &:hover {
     border-color: rgba(0, 181, 173, 0.45);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
   }
 
   img {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
     object-fit: cover;
     flex-shrink: 0;
+    border: 1px solid #f0f2f5;
   }
 }
 
-.link-info {
+.project-info {
   min-width: 0;
+  flex: 1;
 
-  p {
-    margin: 0;
-    color: #2f3237;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.4;
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    p {
+      margin: 0;
+      color: #2f3237;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stars {
+      color: #e6a23c;
+      font-size: 12px;
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
   }
 
-  span {
+  .desc {
     display: block;
-    margin-top: 2px;
-    color: #8c929b;
+    margin-top: 4px;
+    color: #606266;
     font-size: 12px;
-    white-space: nowrap;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tech-stack {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #909399;
+    background: #f4f4f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

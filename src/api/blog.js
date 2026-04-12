@@ -34,6 +34,12 @@ export function getLinks () {
   return request.get('/blog/links')
 }
 
+// ========== 开源项目 ==========
+
+export function getOpenProjects () {
+  return request.get('/blog/projects')
+}
+
 // ========== 博客配置 ==========
 
 export function getBlogConfig () {

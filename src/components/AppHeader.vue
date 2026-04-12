@@ -11,6 +11,7 @@
           <router-link to="/category/-1"><i class="el-icon-folder-opened" /> 分类</router-link>
           <router-link to="/tag/-1"><i class="el-icon-price-tag" /> 标签</router-link>
           <router-link to="/archive"><i class="el-icon-collection" /> 归档</router-link>
+          <router-link to="/links"><i class="el-icon-link" /> 友链</router-link>
           <router-link to="/about"><i class="el-icon-user" /> 关于我</router-link>
         </nav>
 

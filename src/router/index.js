@@ -37,8 +37,14 @@ const routes = [
   {
     path: '/about',
     name: 'about',
-    meta: { title: '\u5173\u4e8e\u6211' },
+    meta: { title: '关于我' },
     component: () => import('../views/About.vue')
+  },
+  {
+    path: '/links',
+    name: 'links',
+    meta: { title: '友情链接' },
+    component: () => import('../views/Links.vue')
   },
   {
     path: '*',
@@ -54,7 +60,10 @@ const router = new VueRouter({
     if (savedPosition) {
       return savedPosition
     } else {
-      return { x: 0, y: 0 }
+      return {
+        x: 0,
+        y: 0
+      }
     }
   }
 })
