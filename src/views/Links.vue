@@ -2,8 +2,7 @@
   <div class="page-links">
     <section class="link-panel" v-loading="linkLoading">
       <div class="link-header">
-        <h2><i class="el-icon-link" /> 友情链接</h2>
-        <p>欢迎互访交流，申请友链请在关于我页面联系我 ~</p>
+        <h2><i class="el-icon-link" /> 欢迎互访交流，申请友链请在关于我页面联系我 ~</h2>
       </div>
 
       <div v-if="normalizedLinks.length" class="link-grid">

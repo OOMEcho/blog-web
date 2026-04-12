@@ -7,31 +7,31 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    meta: { title: '\u9996\u9875' },
+    meta: { title: '首页' },
     component: () => import('../views/Home.vue')
   },
   {
     path: '/article/:id',
     name: 'article',
-    meta: { title: '\u6587\u7ae0\u8be6\u60c5' },
+    meta: { title: '文章详情' },
     component: () => import('../views/ArticleDetail.vue')
   },
   {
     path: '/category/:id',
     name: 'category',
-    meta: { title: '\u5206\u7c7b' },
+    meta: { title: '分类' },
     component: () => import('../views/CategoryList.vue')
   },
   {
     path: '/tag/:id',
     name: 'tag',
-    meta: { title: '\u6807\u7b7e' },
+    meta: { title: '标签' },
     component: () => import('../views/TagList.vue')
   },
   {
     path: '/archive',
     name: 'archive',
-    meta: { title: '\u5f52\u6863' },
+    meta: { title: '归档' },
     component: () => import('../views/Archive.vue')
   },
   {
@@ -43,7 +43,7 @@ const routes = [
   {
     path: '/links',
     name: 'links',
-    meta: { title: '友情链接' },
+    meta: { title: '友链' },
     component: () => import('../views/Links.vue')
   },
   {
@@ -60,10 +60,7 @@ const router = new VueRouter({
     if (savedPosition) {
       return savedPosition
     } else {
-      return {
-        x: 0,
-        y: 0
-      }
+      return { x: 0, y: 0 }
     }
   }
 })
@@ -72,7 +69,7 @@ router.afterEach((to) => {
   if (typeof document === 'undefined') {
     return
   }
-  document.title = (to.meta && to.meta.title) || process.env.VUE_APP_TITLE || '\u9996\u9875'
+  document.title = (to.meta && to.meta.title) || process.env.VUE_APP_TITLE || '首页'
 })
 
 export default router
