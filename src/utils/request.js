@@ -11,12 +11,6 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    if (config.method === 'get') {
-      config.params = {
-        ...config.params,
-        _t: Date.now()
-      }
-    }
     return config
   },
   error => Promise.reject(error)

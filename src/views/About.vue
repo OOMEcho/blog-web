@@ -2,7 +2,7 @@
   <div class="page-about">
     <section class="about-layout">
       <aside class="about-left">
-        <img class="avatar" :src="avatarUrl" alt="站点头像" @error="onAvatarError">
+        <img class="avatar" :src="avatarUrl" alt="站点头像" width="180" height="180" decoding="async" @error="onAvatarError">
       </aside>
 
       <article class="about-right">
@@ -37,7 +37,7 @@
           rel="noopener noreferrer"
           class="project-item"
         >
-          <img :src="resolveLogo(project.logo)" :alt="project.name" @error="onLogoError">
+          <img :src="resolveLogo(project.logo)" :alt="project.name" width="48" height="48" loading="lazy" decoding="async" @error="onLogoError">
           <div class="project-info">
             <div class="project-header">
               <p>{{ project.name }}</p>

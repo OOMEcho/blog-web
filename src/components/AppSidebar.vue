@@ -52,7 +52,7 @@
       <h4 class="card-title"><i class="el-icon-star-on" /> 最新推荐</h4>
       <ul class="recommend-list" v-if="recommendList.length">
         <li v-for="item in recommendList" :key="item.id" @click="$router.push(`/article/${item.id}`)">
-          <img v-if="item.coverImage" :src="item.coverImage" :alt="item.title">
+          <img v-if="item.coverImage" :src="item.coverImage" :alt="item.title" width="64" height="44" loading="lazy" decoding="async">
           <div class="recommend-content">
             <p class="recommend-title">{{ item.title }}</p>
             <span>{{ formatDate(item.createTime) }}</span>

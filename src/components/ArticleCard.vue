@@ -13,6 +13,10 @@
             <img
               :src="resolveAuthorAvatar(article.authorAvatar)"
               alt="author"
+              width="24"
+              height="24"
+              loading="lazy"
+              decoding="async"
               @error="onAvatarError"
             >
             <em>{{ article.authorName || '博主' }}</em>
@@ -42,7 +46,7 @@
       </div>
 
       <router-link v-if="article.coverImage" class="cover-wrap" :to="`/article/${article.id}`">
-        <img :src="article.coverImage" :alt="article.title">
+        <img :src="article.coverImage" :alt="article.title" width="640" height="360" loading="lazy" decoding="async">
       </router-link>
     </div>
   </article>

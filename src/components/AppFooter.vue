@@ -25,6 +25,10 @@
             src="/images/beian.png"
             alt="备案图标"
             class="beian-icon"
+            width="20"
+            height="20"
+            loading="lazy"
+            decoding="async"
             @error="beianIconError = true"
           >
           <a

@@ -33,7 +33,7 @@
           <main class="detail-main">
             <section class="detail-head">
               <div class="head-item author">
-                <img :src="resolveAuthorAvatar(article.authorAvatar)" alt="author" @error="onAvatarError">
+                <img :src="resolveAuthorAvatar(article.authorAvatar)" alt="author" width="24" height="24" loading="lazy" decoding="async" @error="onAvatarError">
                 <router-link to="/about">{{ article.authorName || '博主' }}</router-link>
               </div>
               <div class="head-item"><i class="el-icon-date" /> {{ formatDate(article.createTime) }}</div>
@@ -41,7 +41,7 @@
             </section>
 
             <section class="detail-cover" v-if="article.coverImage">
-              <img :src="article.coverImage" :alt="article.title">
+              <img :src="article.coverImage" :alt="article.title" width="1280" height="720" decoding="async" fetchpriority="high">
             </section>
 
             <section class="detail-body">
@@ -260,6 +260,7 @@ export default {
       }
 
       if (!headingNodes.length) {
+        this.applyContentImageOptimization()
         return
       }
 
@@ -277,8 +278,25 @@ export default {
       })
 
       this.$nextTick(() => {
+        this.applyContentImageOptimization()
         this.setupHeadingObserver()
         this.updateActiveHeadingByScroll()
+      })
+    },
+    applyContentImageOptimization () {
+      const container = this.$refs.articleContent
+      if (!container) {
+        return
+      }
+
+      const images = container.querySelectorAll('img')
+      images.forEach(img => {
+        if (!img.getAttribute('loading')) {
+          img.setAttribute('loading', 'lazy')
+        }
+        if (!img.getAttribute('decoding')) {
+          img.setAttribute('decoding', 'async')
+        }
       })
     },
     scrollToHeading (id) {

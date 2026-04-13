@@ -14,7 +14,7 @@
           rel="noopener noreferrer"
           class="link-item"
         >
-          <img :src="resolveLinkLogo(link.logo)" :alt="link.name" @error="onLinkLogoError">
+          <img :src="resolveLinkLogo(link.logo)" :alt="link.name" width="52" height="52" loading="lazy" decoding="async" @error="onLinkLogoError">
           <div class="link-info">
             <p>{{ link.name }}</p>
             <span>{{ link.description || '欢迎互访交流' }}</span>
