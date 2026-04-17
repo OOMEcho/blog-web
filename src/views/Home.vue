@@ -14,9 +14,10 @@
 
         <div v-loading="loading">
           <article-card
-            v-for="article in articles"
+            v-for="(article, index) in articles"
             :key="article.id"
             :article="article"
+            :style="{ '--enter-delay': (index % 6) * 60 + 'ms' }"
           />
         </div>
 

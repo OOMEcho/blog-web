@@ -172,6 +172,26 @@ export default {
     padding: 8px 14px;
     border-radius: 4px;
     transition: all 0.2s ease;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      width: 0;
+      height: 2px;
+      background: var(--blog-brand);
+      border-radius: 2px;
+      transform: translateX(-50%);
+      transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &:hover::after,
+    &.router-link-exact-active::after,
+    &.router-link-active::after {
+      width: calc(100% - 24px);
+    }
 
     &:hover {
       color: #fff;
@@ -194,6 +214,13 @@ export default {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--blog-brand);
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 0 3px rgba(0, 181, 173, 0.18);
+  }
 }
 
 .search-input {

@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <app-header />
-    <router-view class="app-view" />
+    <transition name="page" mode="out-in">
+      <router-view class="app-view" />
+    </transition>
     <app-footer />
   </div>
 </template>
@@ -15,20 +17,41 @@ export default {
   components: { AppHeader, AppFooter },
   data () {
     return {
-      live2dLoaded: false
+      live2dLoaded: false,
+      live2dErrorHandler: null
     }
   },
   created () {
     this.$store.dispatch('fetchBlogConfig').catch(() => {})
   },
   mounted () {
+    this.installLive2dErrorFilter()
     this.tryLoadLive2d()
     window.addEventListener('resize', this.tryLoadLive2d, { passive: true })
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.tryLoadLive2d)
+    if (this.live2dErrorHandler) {
+      window.removeEventListener('error', this.live2dErrorHandler, true)
+      this.live2dErrorHandler = null
+    }
   },
   methods: {
+    installLive2dErrorFilter () {
+      if (typeof window === 'undefined' || this.live2dErrorHandler) {
+        return
+      }
+      const handler = (event) => {
+        const msg = (event && event.message) || ''
+        const src = (event && event.filename) || ''
+        if (msg.includes("reading 'hitTest'") && src.includes('live2d')) {
+          event.stopImmediatePropagation()
+          event.preventDefault()
+        }
+      }
+      window.addEventListener('error', handler, true)
+      this.live2dErrorHandler = handler
+    },
     tryLoadLive2d () {
       if (this.live2dLoaded || typeof window === 'undefined') {
         return
@@ -114,6 +137,29 @@ a {
   #waifu,
   #waifu-toggle {
     display: none !important;
+  }
+}
+
+.page-enter-active {
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-active {
+  transition: opacity 0.15s ease;
+}
+.page-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
 </style>

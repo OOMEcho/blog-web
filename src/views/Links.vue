@@ -147,12 +147,20 @@ export default {
   border: 1px solid #e9edf0;
   border-radius: 8px;
   padding: 16px;
-  transition: all 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
 
   &:hover {
     border-color: var(--blog-brand-dark);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
+
+    img {
+      transform: rotate(6deg) scale(1.05);
+    }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
   }
 
   img {
@@ -162,6 +170,7 @@ export default {
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid #f0f2f5;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 

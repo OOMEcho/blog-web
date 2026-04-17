@@ -36,9 +36,10 @@
 
           <div v-loading="loading">
             <article-card
-              v-for="article in articles"
+              v-for="(article, index) in articles"
               :key="article.id"
               :article="article"
+              :style="{ '--enter-delay': (index % 6) * 60 + 'ms' }"
             />
           </div>
           <el-empty v-if="!loading && articles.length === 0" description="该标签下暂无文章" />

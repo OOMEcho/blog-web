@@ -1,5 +1,5 @@
 <template>
-  <article class="article-card">
+  <article class="article-card" :class="{ 'in-view': inView }" ref="card">
     <div class="card-grid" :class="{ 'no-cover': !article.coverImage }">
       <div class="card-main">
         <h2 class="card-title">
@@ -55,6 +55,7 @@
 <script>
 import { formatDate, excerpt } from '@/utils/format'
 import { buildTagStyle } from '@/utils/color'
+import { observeOnce } from '@/utils/inView'
 
 export default {
   name: 'ArticleCard',
@@ -66,7 +67,19 @@ export default {
   },
   data () {
     return {
-      defaultAvatar: '/images/default-avatar.png'
+      defaultAvatar: '/images/default-avatar.png',
+      inView: false,
+      stopObserve: null
+    }
+  },
+  mounted () {
+    this.stopObserve = observeOnce(this.$refs.card, () => {
+      this.inView = true
+    })
+  },
+  beforeDestroy () {
+    if (typeof this.stopObserve === 'function') {
+      this.stopObserve()
     }
   },
   computed: {
@@ -120,6 +133,25 @@ export default {
   box-shadow: var(--blog-shadow);
   padding: 18px;
   margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--enter-delay, 0ms),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--enter-delay, 0ms),
+    box-shadow 0.25s ease;
+
+  &.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &:hover {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  }
+
+  &.in-view:hover {
+    transform: translateY(-3px);
+  }
 }
 
 .card-grid {
@@ -204,6 +236,15 @@ export default {
   padding: 0 10px;
   line-height: 24px;
   cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
 
   &.category {
     border-color: #99e5df;
