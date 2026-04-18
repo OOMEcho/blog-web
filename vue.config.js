@@ -25,7 +25,14 @@ module.exports = defineConfig({
         pathRewrite: { ['^' + process.env.VUE_APP_BASE_PRE]: '' }
       }
     },
-    allowedHosts: 'all'
+    allowedHosts: 'all',
+    client: {
+      overlay: {
+        runtimeErrors: (error) => {
+          return !(error && /reading 'hitTest'/.test(error.message || ''))
+        }
+      }
+    }
   },
 
   configureWebpack: {
