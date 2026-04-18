@@ -1,20 +1,24 @@
 <template>
   <div id="app">
+    <particle-background />
     <app-header />
     <transition name="page" mode="out-in">
       <router-view class="app-view" />
     </transition>
     <app-footer />
+    <particle-switcher />
   </div>
 </template>
 
 <script>
 import AppHeader from './components/AppHeader.vue'
 import AppFooter from './components/AppFooter.vue'
+import ParticleBackground from './components/ParticleBackground.vue'
+import ParticleSwitcher from './components/ParticleSwitcher.vue'
 
 export default {
   name: 'App',
-  components: { AppHeader, AppFooter },
+  components: { AppHeader, AppFooter, ParticleBackground, ParticleSwitcher },
   data () {
     return {
       live2dLoaded: false,
