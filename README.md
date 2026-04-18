@@ -195,15 +195,15 @@ npm run serve
 
 默认端口：后端 `9090`，后台 `9099`，前台 `9088`。
 
-## 🖼️ 界面预览（待补充）
+## 🖼️ 界面预览
 
-| 页面 | 说明 | 图片 |
-| --- | --- | --- |
-| 首页 | 文章列表 + 搜索 + 侧栏 | 待补充 |
-| 详情页 | Markdown 渲染 + 目录导航 | 待补充 |
-| 分类页 | 分类筛选与计数展示 | 待补充 |
-| 标签页 | 标签筛选与计数展示 | 待补充 |
-| 关于页 | 配置化内容 + 友情链接 | 待补充 |
+![首页](docs/screenshots/blog-dashboard.png)
+![详情](docs/screenshots/blog-detail.png)
+![分类](docs/screenshots/blog-category.png)
+![标签](docs/screenshots/blog-tag.png)
+![归档](docs/screenshots/blog-archive.png)
+![友链](docs/screenshots/blog-link.png)
+![关于我](docs/screenshots/blog-about.png)
 
 ## ❓ 常见问题
 
@@ -226,6 +226,8 @@ npm run serve
 
 <div align="center">
 
-Made with ❤️ by 南常
+**如果这个项目对您有帮助，请给它一个 ⭐ Star！**
+
+Made with ❤️ by [OOMEcho](https://github.com/OOMEcho)
 
 </div>
