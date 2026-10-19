@@ -3,8 +3,8 @@
     <header class="viewer-tools">
       <span aria-live="polite">{{ index + 1 }} / {{ total }}</span>
       <div>
-        <a :href="originalUrl" download>下载原图</a>
-        <button type="button" aria-label="关闭照片浏览" @click="$emit('close')">关闭 ×</button>
+        <a :href="originalUrl" download><i class="el-icon-download" aria-hidden="true" /> 下载原图</a>
+        <button type="button" aria-label="关闭照片浏览" @click="$emit('close')"><i class="el-icon-close" aria-hidden="true" /> 关闭</button>
       </div>
     </header>
     <div class="viewer-stage" @touchstart="touchStart" @touchend="touchEnd">
@@ -73,9 +73,11 @@ export default {
 
 <style scoped>
 .photo-viewer { position: fixed; inset: 0; z-index: 3000; background: #15191d; color: #f2f4f5; display: flex; flex-direction: column; padding: 16px 24px; }
-.viewer-tools { display: flex; justify-content: space-between; align-items: center; font: 13px ui-monospace, monospace; }
+.viewer-tools { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding-bottom: 12px; border-bottom: 1px solid #30383e; }
 .viewer-tools > div { display: flex; gap: 16px; align-items: center; }
-.viewer-tools a { color: #c0e7e3; padding: 12px 0; }
+.viewer-tools a { display: inline-flex; align-items: center; gap: 6px; color: #c0e7e3; text-decoration: none; min-height: 44px; padding: 10px 12px; border-radius: 6px; }
+.viewer-tools a:hover, .viewer-tools button:hover { background: #ffffff12; }
+.photo-viewer .viewer-tools button { padding: 8px 12px; border-radius: 6px; font-size: 13px; }
 .photo-viewer button { border: 0; background: transparent; color: inherit; cursor: pointer; min-height: 44px; min-width: 44px; font-size: 16px; }
 .photo-viewer button:disabled { opacity: .25; cursor: default; }
 .photo-viewer :focus-visible { outline: 2px solid #93d5cf; outline-offset: 3px; }
