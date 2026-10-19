@@ -47,6 +47,18 @@ const routes = [
     component: () => import('../views/Links.vue')
   },
   {
+    path: '/photography',
+    name: 'photography',
+    meta: { title: '摄影' },
+    component: () => import('../views/Photography.vue')
+  },
+  {
+    path: '/photography/:id',
+    name: 'photo-album',
+    meta: { title: '摄影相册' },
+    component: () => import('../views/Photography.vue')
+  },
+  {
     path: '*',
     redirect: '/'
   }

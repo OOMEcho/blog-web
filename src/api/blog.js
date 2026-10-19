@@ -45,3 +45,22 @@ export function getOpenProjects () {
 export function getBlogConfig () {
   return request.get('/blog/config')
 }
+
+// ========== 摄影 ==========
+
+export function getAlbums (params) {
+  return request.get('/blog/photography/albums', { params })
+}
+
+export function getAlbum (id) {
+  return request.get(`/blog/photography/albums/${id}`)
+}
+
+export function getPhotos (id, params) {
+  return request.get(`/blog/photography/albums/${id}/photos`, { params })
+}
+
+export function photoUrl (albumId, photoId, variant = 'thumbnail') {
+  const base = (request.defaults.baseURL || '').replace(/\/$/, '')
+  return `${base}/blog/photography/albums/${encodeURIComponent(albumId)}/photos/${encodeURIComponent(photoId)}/${variant}`
+}

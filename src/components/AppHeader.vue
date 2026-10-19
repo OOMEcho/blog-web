@@ -10,6 +10,7 @@
           <router-link to="/" exact><i class="el-icon-house" /> 首页</router-link>
           <router-link to="/category/-1"><i class="el-icon-folder-opened" /> 分类</router-link>
           <router-link to="/tag/-1"><i class="el-icon-price-tag" /> 标签</router-link>
+          <router-link to="/photography"><i class="el-icon-camera" /> 摄影</router-link>
           <router-link to="/archive"><i class="el-icon-collection" /> 归档</router-link>
           <router-link to="/links"><i class="el-icon-link" /> 友链</router-link>
           <router-link to="/about"><i class="el-icon-user" /> 关于我</router-link>
@@ -38,6 +39,7 @@
             <router-link to="/" exact @click.native="mobileOpen = false"><i class="el-icon-house" /> 首页</router-link>
             <router-link to="/category/-1" @click.native="mobileOpen = false"><i class="el-icon-folder-opened" /> 分类</router-link>
             <router-link to="/tag/-1" @click.native="mobileOpen = false"><i class="el-icon-price-tag" /> 标签</router-link>
+            <router-link to="/photography" @click.native="mobileOpen = false"><i class="el-icon-camera" /> 摄影</router-link>
             <router-link to="/archive" @click.native="mobileOpen = false"><i class="el-icon-collection" /> 归档</router-link>
             <router-link to="/links" @click.native="mobileOpen = false"><i class="el-icon-link" /> 友链</router-link>
             <router-link to="/about" @click.native="mobileOpen = false"><i class="el-icon-user" /> 关于我</router-link>
